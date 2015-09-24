@@ -1,5 +1,10 @@
 namespace StackCache.Core.CacheValues
 {
+    /// <summary>
+    /// Cache value container
+    /// Enables invalidation mecanism in order to force local cache to retreive new value's data from 2nd or 3rd level cache
+    /// </summary>
+    /// <typeparam name="T">inner value Data type</typeparam>
     public class CacheValue<T> : ICacheValue
     {
         private CacheValue(T value)
@@ -21,6 +26,10 @@ namespace StackCache.Core.CacheValues
             return cacheValue != null ? cacheValue.Value : default(T);
         }
 
+        /// <summary>
+        /// True is the local data differs from remote data 
+        /// Invalidation occurs after a value have been updated remotely
+        /// </summary>
         public bool IsInvalidated { get; set; }
     }
 }

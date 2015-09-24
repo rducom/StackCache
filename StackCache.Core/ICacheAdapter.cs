@@ -6,7 +6,9 @@ namespace StackCache.Core
     using CacheKeys;
     using Locking;
 
-
+    /// <summary>
+    /// Cache adapter interface for local or distributed cache wrapper implrementation
+    /// </summary>
     public interface ICacheAdapter
     {
         bool Get<T>(CacheKey key, out T value);
@@ -23,12 +25,14 @@ namespace StackCache.Core
 
         void RemoveRegion(KeyPrefix prefix);
 
-        ILock GetLocker();
+
 
         Task<IEnumerable<T>> GetRegionAsync<T>(KeyPrefix prefix);
 
         Task<IEnumerable<KeyValuePair<CacheKey, T>>> GetRegionKeyValuesAsync<T>(KeyPrefix prefix);
 
+
+        ILock GetLocker();
         void Invalidate(params CacheKey[] key);
     }
 }

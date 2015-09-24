@@ -5,6 +5,9 @@ namespace StackCache.Core.CacheKeys
     using System.Linq;
     using ProtoBuf;
 
+    /// <summary>
+    /// A key prefix describe the first part of a CacheKey. It's reusable.
+    /// </summary>
     [ProtoContract]
     public struct KeyPrefix
     {

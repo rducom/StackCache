@@ -1,6 +1,6 @@
 namespace StackCache.Core.CacheKeys
 {
-    public static class KeyHelper
+    internal static class KeyHelper
     {
         internal static unsafe bool Equals(byte[] x, byte[] y)
         {

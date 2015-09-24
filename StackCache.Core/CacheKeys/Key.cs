@@ -3,6 +3,9 @@ namespace StackCache.Core.CacheKeys
     using System.Text;
     using ProtoBuf;
 
+    /// <summary>
+    /// A Key is a chunk of key description. It can be used to define tenant, region, or identity part of a CacheKey
+    /// </summary>
     [ProtoContract]
     public struct Key
     {
