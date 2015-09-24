@@ -1,6 +1,17 @@
-install: 
+
+version: 0.1.{build}
+
+install:  
 - cmd: nuget install redis-64 -excludeversion
 - cmd: redis-64\redis-server.exe --service-install 
 - cmd: redis-64\redis-server.exe --service-start
+
 before_build:
   - nuget restore
+
+environment:
+    COVERALLS_REPO_TOKEN:  
+       secure: +ChVp5vWU6SW7rp6ri8bXwXuSMiJHhdg7SwaKx2Xy4hu0ZBC7APGBgQWJDWYZMei
+	   
+after_test:
+    - packages\coveralls.io.1.1.86\tools\coveralls.net.exe --opencover coverage.xml
