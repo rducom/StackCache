@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E8ED316B-3AEA-4AF8-8E67-E8EF3F1FDE51}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>StackCache.Core</RootNamespace>
+    <AssemblyName>StackCache.Core</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="protobuf-net, Version=2.0.0.668, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
+      <HintPath>..\packages\protobuf-net.2.0.0.668\lib\net40\protobuf-net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="StackExchange.Redis, Version=1.0.316.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\StackExchange.Redis.1.0.481\lib\net45\StackExchange.Redis.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Stores\Crud.cs" />
+    <Compile Include="Cache.cs" />
+    <Compile Include="CacheKeys\CacheKey.cs" />
+    <Compile Include="Stores\Storage.cs" />
+    <Compile Include="Stores\IStorage.cs" />
+    <Compile Include="CacheKeys\Key.cs" />
+    <Compile Include="CacheKeys\KeyHelper.cs" />
+    <Compile Include="CacheKeys\KeyPrefix.cs" />
+    <Compile Include="CacheValues\CacheValue.cs" />
+    <Compile Include="Configuration\CacheConfiguration.cs" />
+    <Compile Include="Configuration\FirstLevelCacheType.cs" />
+    <Compile Include="Configuration\SecondLevelCacheType.cs" />
+    <Compile Include="Serializers\Serializer.cs" />
+    <Compile Include="Stores\CrudAction.cs" />
+    <Compile Include="ICacheAdapterAsync.cs" />
+    <Compile Include="Stores\IDatabaseSource.cs" />
+    <Compile Include="Stores\Management\LoadedInfo.cs" />
+    <Compile Include="Locking\AsyncExclusive.cs" />
+    <Compile Include="Locking\AsyncHelper.cs" />
+    <Compile Include="Locking\AsyncLock.cs" />
+    <Compile Include="Local\Dictionary\DictionaryCacheAdapter.cs" />
+    <Compile Include="CacheKeys\ExpirationMode.cs" />
+    <Compile Include="ICache.cs" />
+    <Compile Include="ICacheAdapter.cs" />
+    <Compile Include="CacheValues\ICacheValue.cs" />
+    <Compile Include="Locking\LocalLocker.cs" />
+    <Compile Include="Serializers\ISerializer.cs" />
+    <Compile Include="Locking\ILock.cs" />
+    <Compile Include="Locking\RedisLocker.cs" />
+    <Compile Include="Messaging\Event.cs" />
+    <Compile Include="Messaging\IMessenger.cs" />
+    <Compile Include="Messaging\Messenger.cs" />
+    <Compile Include="Messaging\Notification.cs" />
+    <Compile Include="Stores\PartialStorage.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Distributed\RedisCacheAdapter.cs" />
+    <Compile Include="Configuration\RedisInstance.cs" />
+    <Compile Include="Serializers\ProtoBufSerializer.cs" />
+    <Compile Include="Stores\Management\LoadingInfo.cs" />
+    <Compile Include="Distributed\RedisTypeHelper.cs" />
+    <Compile Include="Helpers\WrapDisposable.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Local\MemoryCache\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
