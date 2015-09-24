@@ -85,6 +85,7 @@
     <Compile Include="Fixture\Level1Test.cs" />
     <Compile Include="Fixture\Level2Fixture.cs" />
     <Compile Include="Fixture\Level2Test.cs" />
+    <Compile Include="KeyTests.cs" />
     <Compile Include="Level1.cs" />
     <Compile Include="Store\CustomerStore.cs" />
     <Compile Include="Setup.cs" />

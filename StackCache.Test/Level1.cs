@@ -18,9 +18,7 @@ namespace Caching.Test
         [ProtoMember(1)]
         public string Property { get; set; }
     }
-
-
-
+    
     /// <summary>
     /// Check cache without second level adapter
     /// </summary>

@@ -1,5 +1,6 @@
 namespace StackCache.Core.CacheKeys
 {
+    using System.Runtime.Serialization;
     using System.Text;
     using ProtoBuf;
 
@@ -9,6 +10,7 @@ namespace StackCache.Core.CacheKeys
     [ProtoContract]
     public struct Key
     {
+        [ProtoMember(1)]
         private readonly byte[] _key;
         internal const char Separator = '|';
 
@@ -17,8 +19,14 @@ namespace StackCache.Core.CacheKeys
             this._key = keyData;
         }
 
-        internal bool IsNullOrEmpty => this._key == null || this._key.Length == 0;
+        public Key(SerializationInfo info, StreamingContext text)
+                : this()
+        {
+            this._key = (byte[])info.GetValue(nameof(this.KeyData), typeof(Key));
+        }
 
+        internal bool IsNullOrEmpty => this._key == null || this._key.Length == 0;
+        
         public byte[] KeyData => this._key;
 
         /// <summary>
@@ -57,7 +65,7 @@ namespace StackCache.Core.CacheKeys
             return key == null ? Null : new Key(Encoding.UTF8.GetBytes(key));
         }
 
-        public static implicit operator string(Key key)
+        public static implicit operator string (Key key)
         {
             return key == null ? null : Encoding.UTF8.GetString(key._key);
         }

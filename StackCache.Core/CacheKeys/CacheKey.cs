@@ -3,6 +3,7 @@ namespace StackCache.Core.CacheKeys
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.Serialization;
     using ProtoBuf;
     using StackExchange.Redis;
 
@@ -14,26 +15,43 @@ namespace StackCache.Core.CacheKeys
     [ProtoContract]
     public struct CacheKey
     {
-        private CacheKey(string prefix, string region, string key)
-            : this()
-        {
-            this.Prefix = new KeyPrefix(prefix, region);
-            this.Suffix = key;
-            this.ExpirationMode = ExpirationMode.None;
-        }
-
         public CacheKey(KeyPrefix prefix, Key sufffix)
             : this()
         {
-            this.Prefix = prefix;
-            this.Suffix = sufffix;
+            this._prefix = prefix;
+            this._suffix = sufffix;
             this.ExpirationMode = ExpirationMode.None;
         }
 
+        public CacheKey(Key tenant, Key region, Key sufffix)
+           : this()
+        {
+            this._prefix = new KeyPrefix(tenant, region);
+            this._suffix = sufffix;
+            this.ExpirationMode = ExpirationMode.None;
+        }
+
+        // this constructor is used for deserialization
+        public CacheKey(SerializationInfo info, StreamingContext text)
+                : this()
+        {
+            this._prefix = (KeyPrefix)info.GetValue(nameof(this.Prefix), typeof(KeyPrefix));
+            this._suffix = (Key)info.GetValue(nameof(this.Suffix), typeof(Key));
+        }
+         
         private static readonly CacheKey _null = new CacheKey(null, null, null);
 
-        public KeyPrefix Prefix { get; }
-        public Key Suffix { get; }
+        [ProtoMember(1)]
+        private readonly KeyPrefix _prefix;
+
+        [ProtoMember(2)]
+        private readonly Key _suffix;
+
+        
+        public KeyPrefix Prefix => this._prefix;
+
+        
+        public Key Suffix => this._suffix;
 
         public ExpirationMode ExpirationMode { get; private set; }
         public DateTime? ExpirationDateTime { get; private set; }
@@ -47,14 +65,14 @@ namespace StackCache.Core.CacheKeys
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
-            return obj is CacheKey && this.Equals((CacheKey) obj);
+            return obj is CacheKey && this.Equals((CacheKey)obj);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                return (this.Prefix.GetHashCode()*397) ^ this.Suffix.GetHashCode();
+                return (this.Prefix.GetHashCode() * 397) ^ this.Suffix.GetHashCode();
             }
         }
 
@@ -93,15 +111,15 @@ namespace StackCache.Core.CacheKeys
 
         public static implicit operator RedisKey(CacheKey key)
         {
-            return (string) key;
+            return (string)key;
         }
 
         public static implicit operator CacheKey(RedisKey key)
         {
-            return (string) key;
+            return (string)key;
         }
 
-        public static implicit operator string(CacheKey key)
+        public static implicit operator string (CacheKey key)
         {
             return key.Prefix + Key.Separator + key.Suffix;
         }

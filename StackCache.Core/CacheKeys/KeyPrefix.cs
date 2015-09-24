@@ -3,6 +3,7 @@ namespace StackCache.Core.CacheKeys
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.Serialization;
     using ProtoBuf;
 
     /// <summary>
@@ -14,19 +15,23 @@ namespace StackCache.Core.CacheKeys
         public KeyPrefix(string tenant, string region)
             : this()
         {
-            this.Tenant = tenant;
-            this.Subset = region;
+            this._tenant = tenant;
+            this._region = region;
         }
 
-        [ProtoMember(1)]
-        public Key Tenant { get; private set; }
+        public KeyPrefix(SerializationInfo info, StreamingContext text)
+                : this()
+        {
+            this._tenant = (Key)info.GetValue(nameof(this.Tenant), typeof(Key));
+            this._region = (Key)info.GetValue(nameof(this.Region), typeof(Key));
+        }
 
-        [ProtoMember(2)]
-        public Key Subset { get; private set; }
+        public Key Tenant => this._tenant;
+        public Key Region => this._region;
 
         public static implicit operator string(KeyPrefix key)
         {
-            return key.Tenant + Key.Separator + key.Subset;
+            return key.Tenant + Key.Separator + key.Region;
         }
 
         public static implicit operator KeyPrefix(string key)
@@ -50,6 +55,11 @@ namespace StackCache.Core.CacheKeys
 
         public static KeyPrefix Null = new KeyPrefix(null, null);
 
+        [ProtoMember(1)]
+        private readonly Key _tenant;
+
+        [ProtoMember(2)]
+        private readonly Key _region;
 
         public static CacheKey operator +(KeyPrefix x, Key y)
         {
@@ -63,7 +73,7 @@ namespace StackCache.Core.CacheKeys
 
         public static bool operator ==(KeyPrefix x, KeyPrefix y)
         {
-            return x.Tenant == y.Tenant && x.Subset == y.Subset;
+            return x.Tenant == y.Tenant && x.Region == y.Region;
         }
 
         public override bool Equals(object obj)
@@ -77,7 +87,7 @@ namespace StackCache.Core.CacheKeys
         public override int GetHashCode()
         {
             int hash1 = this.Tenant.IsNullOrEmpty ? 0 : this.Tenant.GetHashCode();
-            int hash2 = this.Subset.IsNullOrEmpty ? 0 : this.Subset.GetHashCode();
+            int hash2 = this.Region.IsNullOrEmpty ? 0 : this.Region.GetHashCode();
             return unchecked((31 * hash1) + hash2);
         }
 
