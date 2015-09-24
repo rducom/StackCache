@@ -1,6 +1,3 @@
-
-version: 0.1.{build}
-
 install:  
 - cmd: nuget install redis-64 -excludeversion
 - cmd: redis-64\redis-server.exe --service-install 
