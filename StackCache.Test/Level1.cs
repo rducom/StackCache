@@ -7,6 +7,7 @@ using Xunit.Abstractions;
 
 namespace Caching.Test
 {
+    using System;
     using Data;
     using StackCache.Core;
     using StackCache.Core.Configuration;
@@ -64,6 +65,11 @@ namespace Caching.Test
         private ICache _cache1;
         private ICache _cache2;
 
+        /// <summary>
+        /// Simulate network latency
+        /// </summary>
+        public static TimeSpan ConcurrentDelay = TimeSpan.FromMilliseconds(64);
+
         [Fact]
         public void GetPut()
         {
@@ -74,16 +80,22 @@ namespace Caching.Test
 
 
         [Fact]
-        public void GetPutUpdate()
+        public async Task GetPutUpdate()
         {
             var key = _keySerialized + "UP";
             this._cache1.Put(key, _dataSerialized);
+
+            await Task.Delay(ConcurrentDelay);
+
             var found = this._cache2.Get<Serialized>(key);
             Assert.Equal(found.Property, _dataSerialized.Property);
+
 
             var initial = this._cache1.Get<Serialized>(key);
             initial.Property = "666";
             this._cache1.Put(key, initial);
+
+            await Task.Delay(ConcurrentDelay);
 
             var updated = this._cache2.Get<Serialized>(key);
             Assert.Equal(updated.Property, "666");
