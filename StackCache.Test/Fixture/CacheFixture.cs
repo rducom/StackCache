@@ -1,8 +1,7 @@
-using System;
-using System.Data.Entity;
-
 namespace Caching.Test.Fixture
 {
+    using System;
+    using System.Data.Entity;
     using Data;
     using StackCache.Core;
 
@@ -13,7 +12,7 @@ namespace Caching.Test.Fixture
             Database.SetInitializer(new CustomersTestData());
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
         }
 
