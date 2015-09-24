@@ -11,6 +11,9 @@ namespace StackCache.Core.Distributed
     using Serializers;
     using StackExchange.Redis;
 
+    /// <summary>
+    /// Redis cache wrapper around StackExchange.Redis
+    /// </summary>
     public class RedisCacheAdapter : ICacheAdapter, IMessenger
     {
         public RedisCacheAdapter(IEnumerable<RedisInstance> redisInsances, int databaseNumber, ISerializer serializer)
