@@ -14,7 +14,7 @@ build:
   
 environment:
   COVERALLS_REPO_TOKEN:
-    secure: +ChVp5vWU6SW7rp6ri8bXwXuSMiJHhdg7SwaKx2Xy4hu0ZBC7APGBgQWJDWYZMei
+    secure: kwZmZVMlkMBfoLy7tJOcm4emlFLrdRkvoIKbGSKXTDQ/21dbDg30yrSG5/dvtEJ0
 
 after_test:
 - packages\OpenCover.4.6.210-rc\tools\OpenCover.Console.exe -register:user -target:"packages\xunit.runner.console.2.0.0\tools\xunit.console.exe" -targetargs:"StackCache.Test\bin\Debug\StackCache.Test.dll -noshadow" -filter:"+[StackCache*]* -[StackCache.Test]*" -output:opencovertests.xml -coverbytest:*.Test.dll
