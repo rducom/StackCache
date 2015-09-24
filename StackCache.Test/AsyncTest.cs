@@ -8,12 +8,12 @@ namespace Caching.Test
 {
     using StackCache.Core.Locking;
 
-    public class AsyncTest
+    public class AsyncStructs
     {
-        private static int iterations = 4096 * 2;
-
+        private static int parallelAwaits = 4096 * 2;
+         
         [Fact]
-        public async Task v1()
+        public async Task AsyncExclusiveTest()
         {
             int count = 0;
 
@@ -24,100 +24,22 @@ namespace Caching.Test
                 return 42;
             };
 
-            var once = funk.OnlyOnce();
+            AsyncExclusive<int> once = funk.OnlyOnce();
 
-            await Task.WhenAll(Enumerable.Range(0, iterations).Select(async i =>
+            await Task.WhenAll(Enumerable.Range(0, parallelAwaits).Select(async i =>
             {
-                int found = await once.ExclusiveAsync_v1();
+                int found = await once.Exclusive();
                 Assert.Equal(found, 42);
             }));
 
-            int foundBis = await once.ExclusiveAsync_v1();
+            int foundBis = await once.Exclusive();
             Assert.Equal(foundBis, 42);
             Assert.Equal(count, 1);
         }
 
 
         [Fact]
-        public async Task v2()
-        {
-            int count = 0;
-
-            Func<Task<int>> funk = async () =>
-            {
-                Interlocked.Increment(ref count);
-                await Task.Delay(100);
-                return 42;
-            };
-
-            var once = funk.OnlyOnce();
-
-            await Task.WhenAll(Enumerable.Range(0, iterations).Select(async i =>
-            {
-                int found = await once.ExclusiveAsync_v2();
-                Assert.Equal(found, 42);
-            }));
-
-            int foundBis = await once.ExclusiveAsync_v2();
-            Assert.Equal(foundBis, 42);
-            Assert.Equal(count, 1);
-        }
-
-
-        [Fact]
-        public async Task v3()
-        {
-            int count = 0;
-
-            Func<Task<int>> funk = async () =>
-            {
-                Interlocked.Increment(ref count);
-                await Task.Delay(100);
-                return 42;
-            };
-
-            var once = funk.OnlyOnce();
-
-            await Task.WhenAll(Enumerable.Range(0, iterations).Select(async i =>
-            {
-                int found = await once.ExclusiveAsync_v3();
-                Assert.Equal(found, 42);
-            }));
-
-            int foundBis = await once.ExclusiveAsync_v3();
-            Assert.Equal(foundBis, 42);
-            Assert.Equal(count, 1);
-        }
-
-
-        [Fact]
-        public async Task v4()
-        {
-            int count = 0;
-
-            Func<Task<int>> funk = async () =>
-            {
-                Interlocked.Increment(ref count);
-                await Task.Delay(100);
-                return 42;
-            };
-
-            var once = funk.OnlyOnce();
-
-            await Task.WhenAll(Enumerable.Range(0, iterations).Select(async i =>
-            {
-                int found = await once.ExclusiveAsync_v4();
-                Assert.Equal(found, 42);
-            }));
-
-            int foundBis = await once.ExclusiveAsync_v4();
-            Assert.Equal(foundBis, 42);
-            Assert.Equal(count, 1);
-        }
-
-
-        [Fact]
-        public async Task v5()
+        public async Task AsyncLazyTest()
         {
             int count = 0;
 
@@ -130,7 +52,7 @@ namespace Caching.Test
 
             var once = new AsyncLazy<int>(funk);
 
-            await Task.WhenAll(Enumerable.Range(0, iterations).Select(async i =>
+            await Task.WhenAll(Enumerable.Range(0, parallelAwaits).Select(async i =>
             {
                 int found = await once;
                 Assert.Equal(found, 42);

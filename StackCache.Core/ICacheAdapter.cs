@@ -24,8 +24,7 @@ namespace StackCache.Core
         void PutRegion<T>(KeyValuePair<CacheKey, T>[] values);
 
         void RemoveRegion(KeyPrefix prefix);
-
-
+        
         Task<IEnumerable<T>> GetRegionAsync<T>(KeyPrefix prefix);
 
         Task<IEnumerable<KeyValuePair<CacheKey, T>>> GetRegionKeyValuesAsync<T>(KeyPrefix prefix);
