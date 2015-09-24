@@ -10,7 +10,7 @@ namespace StackCache.Core
     /// Cache adapter interface for local or distributed cache wrapper implrementation
     /// </summary>
     public interface ICacheAdapter
-    {
+    { 
         bool Get<T>(CacheKey key, out T value);
 
         void Put<T>(CacheKey key, T value);
@@ -24,7 +24,6 @@ namespace StackCache.Core
         void PutRegion<T>(KeyValuePair<CacheKey, T>[] values);
 
         void RemoveRegion(KeyPrefix prefix);
-
 
 
         Task<IEnumerable<T>> GetRegionAsync<T>(KeyPrefix prefix);
