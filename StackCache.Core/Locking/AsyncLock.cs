@@ -5,7 +5,7 @@ namespace StackCache.Core.Locking
     using System.Threading;
     using System.Threading.Tasks;
 
-    public sealed class AsyncLock
+    public sealed class AsyncLock : IDisposable
     {
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
         private readonly Task<IDisposable> _releaser;
@@ -36,6 +36,11 @@ namespace StackCache.Core.Locking
             {
                 this._toRelease._semaphore.Release();
             }
+        }
+
+        public void Dispose()
+        {
+            this._semaphore.Dispose();
         }
     }
 

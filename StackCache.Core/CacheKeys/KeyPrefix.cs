@@ -48,7 +48,7 @@ namespace StackCache.Core.CacheKeys
                 case 2:
                     return new KeyPrefix(splitted[0], splitted[1]);
             }
-            throw new Exception("No more 1 '|' separator allowed");
+            return KeyPrefix.Null;
         }
 
         public string SearchPattern => this + Key.Separator + "*";

@@ -4,7 +4,7 @@ namespace StackCache.Core.Locking
     using System.Threading;
     using System.Threading.Tasks;
 
-    public sealed class AsyncExclusive<T>
+    public sealed class AsyncExclusive<T> : IDisposable
     {
         private readonly Func<Task<T>> _task;
         private readonly AsyncLock _lock = new AsyncLock();
@@ -15,7 +15,7 @@ namespace StackCache.Core.Locking
             if (task == null) throw new ArgumentNullException(nameof(task));
             this._task = task;
         }
-         
+
         public async Task<T> Exclusive()
         {
             if (this._singleExecute != null)
@@ -30,6 +30,10 @@ namespace StackCache.Core.Locking
                 return await this._singleExecute;
             }
         }
-         
+
+        public void Dispose()
+        {
+            this._lock.Dispose();
+        }
     }
 }

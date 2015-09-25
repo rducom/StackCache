@@ -140,7 +140,7 @@ namespace StackCache.Core.CacheKeys
                 case 3:
                     return new CacheKey(splitted[0], splitted[1], splitted[2]);
             }
-            throw new Exception("No more 2 '|' separators allowed");
+            return CacheKey._null;
         }
     }
 }
