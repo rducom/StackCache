@@ -48,9 +48,13 @@ namespace StackCache.Core.Locking
                 return this._locks.GetOrAdd(key, (i) => new LockingInstance());
             }
         }
-        class LockingInstance
+        class LockingInstance : IDisposable
         {
             public readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
+            public void Dispose()
+            {
+                Semaphore.Dispose();
+            }
         }
     }
 }
