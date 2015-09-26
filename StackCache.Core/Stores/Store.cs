@@ -10,26 +10,43 @@ namespace StackCache.Core.Stores
     using Helpers;
     using Locking;
 
+
+    public abstract class StoreBase
+    {
+        protected virtual string StoreIdentifier => this.StoreType.Name;
+        protected abstract Type StoreType { get; }
+        protected abstract Key Tenant { get; }
+        private KeyPrefix _prefix;
+
+        protected KeyPrefix Prefix
+        {
+            get
+            {
+                if (this._prefix != KeyPrefix.Null)
+                    return this._prefix;
+                this._prefix = new KeyPrefix(this.Tenant, this.StoreIdentifier);
+                return this._prefix;
+            }
+        }
+    }
+
     /// <summary>
     /// Provide a global storage for a given Type.
     /// A Storage is associated to a StackCache Region and should contains all instances of a given type
     /// </summary>
     /// <typeparam name="T">Type of the stored data</typeparam>
     /// <typeparam name="TKey">Type of the key of the stored data</typeparam>
-    public abstract class Store<T, TKey> : IStore<T, TKey>
+    public abstract class Store<T, TKey> : StoreBase, IStore<T, TKey>
         where T : class
     {
         private readonly ICache _cache;
 
         private readonly AsyncLazy<IEnumerable<T>> _loaderAsyncLazy;
-        private readonly IDatabaseSourceGlobal<T, TKey> _source;
+        private readonly Func<IDatabaseSourceGlobal<T, TKey>> _source;
         private readonly IElection _elector;
-
         private bool _isLoaded;
 
-        // TODO : le prefixe doit rester ici (pas sur IDatabaseSourceGlobal)
-
-        protected Store(ICache cache, IDatabaseSourceGlobal<T, TKey> source, IElection elector)
+        protected Store(ICache cache, Func<IDatabaseSourceGlobal<T, TKey>> source, IElection elector)
         {
             if (cache == null) throw new ArgumentNullException(nameof(cache));
             if (source == null) throw new ArgumentNullException(nameof(source));
@@ -38,45 +55,47 @@ namespace StackCache.Core.Stores
             this._cache = cache;
             this._source = source;
             this._elector = elector;
-            this._loaderAsyncLazy = new AsyncLazy<IEnumerable<T>>((Func<Task<IEnumerable<T>>>) this._source.Load);
-            this.StoreIdentifier = typeof (T).Name;
+            this._loaderAsyncLazy = new AsyncLazy<IEnumerable<T>>((Func<Task<IEnumerable<T>>>)this._source().Load);
         }
 
-        protected virtual TimeSpan LoadingLockTimeout => TimeSpan.FromMinutes(1);
+        protected override Type StoreType => typeof (T);
+
+        protected override Key Tenant => this._cache.Tenant;
 
         public async Task<T> Get(TKey key)
         {
             await this.EnsureLoaded();
-            return this._cache.Get<T>(this._source.Prefix + this._source.ToKey(key));
+            return this._cache.Get<T>(this.Prefix + this.ToKey(key));
         }
 
         public async Task<IEnumerable<T>> Get(params TKey[] keys)
         {
             await this.EnsureLoaded();
             return
-                keys.Select(k => this._cache.Get<T>(this._source.Prefix + this._source.ToKey(k))).Where(t => t != null);
+                keys.Select(k => this._cache.Get<T>(this.Prefix + this.ToKey(k))).Where(t => t != null);
         }
 
         public async Task<IEnumerable<T>> GetAll()
         {
             await this.EnsureLoaded();
-            return this._cache.GetRegion<T>(this._source.Prefix, i => this._source.Prefix + this._source.ToKey(i));
+            return this._cache.GetRegion<T>(this.Prefix, i => this.Prefix + this.ToKey(i));
         }
 
         public async Task Save(IEnumerable<Crud<T>> value)
         {
             IEnumerable<Crud<T>> enumerable = value as IList<Crud<T>> ?? value.ToList();
-            await this._source.Save(enumerable);
+            IDatabaseSourceGlobal<T, TKey> source = this._source();
+            await source.Save(enumerable);
             foreach (Crud<T> v in enumerable)
             {
                 switch (v.Action)
                 {
                     case CrudAction.Insert:
                     case CrudAction.Update:
-                        this._cache.Put(this._source.Prefix + this._source.ToKey(v.Value), v.Value);
+                        this._cache.Put(this.Prefix + this.ToKey(v.Value), v.Value);
                         break;
                     case CrudAction.Delete:
-                        this._cache.Remove(this._source.Prefix + this._source.ToKey(v.Value));
+                        this._cache.Remove(this.Prefix + this.ToKey(v.Value));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -84,7 +103,10 @@ namespace StackCache.Core.Stores
             }
         }
 
-        public virtual string StoreIdentifier { get; }
+        protected abstract Key ToKey(TKey key);
+
+        protected abstract Key ToKey(T value);
+
 
         private async Task EnsureLoaded()
         {
@@ -95,9 +117,10 @@ namespace StackCache.Core.Stores
             {
                 // If we are leader, then we try to load data from source
                 IEnumerable<T> values = await this._loaderAsyncLazy;
+
                 KeyValuePair<CacheKey, T>[] keyValues =
-                    values.Select(i => new KeyValuePair<CacheKey, T>(this._source.Prefix + this._source.ToKey(i), i))
-                        .ToArray();
+                    values.Select(i => new KeyValuePair<CacheKey, T>(this.Prefix + this.ToKey(i), i)).ToArray();
+
                 this._cache.PutRegion(keyValues);
                 this._isLoaded = true;
             });

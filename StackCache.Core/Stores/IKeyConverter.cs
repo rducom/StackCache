@@ -5,10 +5,9 @@ namespace StackCache.Core.Stores
     public interface IKeyConverter<T, TKey>
      where T : class
     {
-        Key ToKey(TKey key);
+        //Key ToKey(TKey key);
 
-        Key ToKey(T value);
+        //Key ToKey(T value);
 
-        KeyPrefix Prefix { get; }
     }
 }

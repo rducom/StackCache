@@ -3,6 +3,7 @@ namespace StackCache.Core.Stores
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using CacheKeys;
 
     public interface IStore<T, in TKey> where T : class
     {
@@ -10,6 +11,5 @@ namespace StackCache.Core.Stores
         Task<IEnumerable<T>> Get(params TKey[] keys);
         Task<IEnumerable<T>> GetAll();
         Task Save(IEnumerable<Crud<T>> value);
-        string StoreIdentifier { get; }
     }
 }

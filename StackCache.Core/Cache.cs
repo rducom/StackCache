@@ -27,15 +27,10 @@ namespace StackCache.Core
             this._messenger?.Subscribe<DataNotification>(this._genericChannel, this.OnNotification);
         }
 
-        private void OnNotification(string channel, DataNotification notification)
+        private void OnNotification(string channel, DataNotification dn)
         {
-            if (notification == null || notification.Source == this._identifier)
+            if (dn == null || dn.Source == this._identifier)
                 return;
-
-            var dn = notification as DataNotification;
-            if (dn == null)
-                return;
-
             switch (dn.NotificationType)
             {
                 case NotificationType.UpdatedItem:
@@ -122,6 +117,8 @@ namespace StackCache.Core
 
             return new WrapDisposable(localDispose, remoteDispose);
         }
+
+        public Key Tenant { get; }
 
         public IEnumerable<T> GetRegion<T>(KeyPrefix prefix, Func<T, CacheKey> keyFromValue)
         {

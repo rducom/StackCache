@@ -28,6 +28,8 @@ namespace StackCache.Core
             
         Task<IDisposable> Lock(string key, TimeSpan timeout, CancellationToken cancellationToken);
 
+        Key Tenant { get; }
+
     }
 }
 

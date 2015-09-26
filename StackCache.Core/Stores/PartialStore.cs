@@ -7,7 +7,7 @@ namespace StackCache.Core.Stores
     using CacheKeys;
 
 
-    public abstract class PartialStore<T, TKey> : IStore<T, TKey>
+    public abstract class PartialStore<T, TKey> : StoreBase, IStore<T, TKey>
         where T : class
     {
         private readonly ICache _cache;
@@ -21,12 +21,16 @@ namespace StackCache.Core.Stores
             this._cache = cache ?? Cache.Default;
             this._source = source;
             this._keyConverter = keyConverter;
-            this.StoreIdentifier = typeof(T).Name;
         }
+
+        protected abstract Key ToKey(TKey key);
+
+        protected abstract Key ToKey(T value);
+
 
         public async Task<T> Get(TKey key)
         {
-            CacheKey cacheKey = this._keyConverter.Prefix + this._keyConverter.ToKey(key);
+            CacheKey cacheKey = this.Prefix + this.ToKey(key);
             var value = this._cache.Get<T>(cacheKey);
             if (value != null)
                 return value;
@@ -45,7 +49,7 @@ namespace StackCache.Core.Stores
 
         public Task<IEnumerable<T>> GetAll()
         {
-            IEnumerable<T> region = this._cache.GetRegion<T>(this._keyConverter.Prefix, i => this._keyConverter.Prefix + this._keyConverter.ToKey(i));
+            IEnumerable<T> region = this._cache.GetRegion<T>(this.Prefix, i => this.Prefix + this.ToKey(i));
             return Task.FromResult(region);
         }
 
@@ -59,17 +63,15 @@ namespace StackCache.Core.Stores
                 {
                     case CrudAction.Insert:
                     case CrudAction.Update:
-                        this._cache.Put(this._keyConverter.Prefix + this._keyConverter.ToKey(v.Value), v.Value);
+                        this._cache.Put(this.Prefix + this.ToKey(v.Value), v.Value);
                         break;
                     case CrudAction.Delete:
-                        this._cache.Remove(this._keyConverter.Prefix + this._keyConverter.ToKey(v.Value));
+                        this._cache.Remove(this.Prefix + this.ToKey(v.Value));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
             }
         }
-
-        public virtual string StoreIdentifier { get; }
     }
 }
