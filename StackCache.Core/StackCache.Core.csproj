@@ -63,6 +63,7 @@
     <Compile Include="Election\ConfiguredElection.cs" />
     <Compile Include="Helpers\ApplicationNode.cs" />
     <Compile Include="Locking\AsyncLazy.cs" />
+    <Compile Include="Locking\LocalLock.cs" />
     <Compile Include="Messaging\DataNotification.cs" />
     <Compile Include="Messaging\INotification.cs" />
     <Compile Include="Messaging\ProtoInherits.cs" />
@@ -94,7 +95,6 @@
     <Compile Include="ICache.cs" />
     <Compile Include="ICacheAdapter.cs" />
     <Compile Include="CacheValues\ICacheValue.cs" />
-    <Compile Include="Locking\LocalLock.cs" />
     <Compile Include="Serializers\ISerializer.cs" />
     <Compile Include="Locking\ILock.cs" />
     <Compile Include="Locking\RedisLocker.cs" />
