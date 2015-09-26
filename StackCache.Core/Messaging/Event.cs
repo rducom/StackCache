@@ -1,6 +1,6 @@
 namespace StackCache.Core.Messaging
 {
-    public enum Event
+    public enum NotificationType
     {
         UpdatedItem = 0,
         UpdatedRegion,

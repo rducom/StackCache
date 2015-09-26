@@ -4,8 +4,8 @@ namespace StackCache.Core.Messaging
 
     public interface IMessenger
     {
-        void Notify(string channel, Notification notification);
+        void Notify<T>(string channel, T notification) where T : INotification;
 
-        void Subscribe(string channel, Action<string, Notification> onNotification);
+        void Subscribe<T>(string channel, Action<string, T> onNotification) where T : INotification;
     }
 }

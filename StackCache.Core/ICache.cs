@@ -27,6 +27,7 @@ namespace StackCache.Core
         T GetOrCreate<T>(CacheKey key, Func<CacheKey, T> cacheValueCreator);
             
         Task<IDisposable> Lock(string key, TimeSpan timeout, CancellationToken cancellationToken);
+
     }
 }
 

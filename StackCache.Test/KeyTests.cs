@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Caching.Test
+﻿namespace StackCache.Test
 {
-    using System.Dynamic;
-    using System.Reflection;
-    using StackCache.Core.CacheKeys;
-    using StackCache.Core.Serializers;
+    using System;
+    using System.Linq;
+    using Core.CacheKeys;
+    using Core.Serializers;
     using Xunit;
 
     public class KeyTests

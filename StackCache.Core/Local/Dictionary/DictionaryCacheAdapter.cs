@@ -18,11 +18,13 @@ namespace StackCache.Core.Local.Dictionary
             return this._dic.GetOrAdd(prefix, p => new ConcurrentDictionary<Key, ICacheValue>());
         }
 
+        public CacheType CacheType => CacheType.Local;
+
         public bool Get<T>(CacheKey key, out T value)
         {
             ICacheValue searched;
             if (this.Sub(key.Prefix).TryGetValue(key.Suffix, out searched))
-            {   
+            {
                 var found = (CacheValue<T>)searched;
                 if (found.IsInvalidated == false)
                 {
@@ -42,7 +44,7 @@ namespace StackCache.Core.Local.Dictionary
         public T GetOrCreate<T>(CacheKey key, Func<CacheKey, T> cacheValueCreator)
         {
             if (cacheValueCreator == null) throw new ArgumentNullException(nameof(cacheValueCreator));
-            return (CacheValue<T>) this.Sub(key.Prefix).GetOrAdd(key.Suffix, (CacheValue<T>)cacheValueCreator(key));
+            return (CacheValue<T>)this.Sub(key.Prefix).GetOrAdd(key.Suffix, (CacheValue<T>)cacheValueCreator(key));
         }
 
         public void Remove(CacheKey key)
@@ -53,20 +55,20 @@ namespace StackCache.Core.Local.Dictionary
 
         public IEnumerable<T> GetRegion<T>(KeyPrefix prefix)
         {
-            return this.Sub(prefix).Values.OfType<CacheValue<T>>().Where(i => i.IsInvalidated == false).Cast<T>();
+            return this.Sub(prefix).Values.OfType<CacheValue<T>>().Where(i => i.IsInvalidated == false).Select(i => i.Value);
         }
 
         public Task<IEnumerable<T>> GetRegionAsync<T>(KeyPrefix prefix)
         {
-            var result = this.Sub(prefix).Values.OfType<CacheValue<T>>().Where(i => i.IsInvalidated == false).Cast<T>().ToList();
-            return Task.FromResult(result.AsEnumerable());
+            var result = this.Sub(prefix).Values.OfType<CacheValue<T>>().Where(i => i.IsInvalidated == false).Select(i => i.Value);
+            return Task.FromResult(result);
         }
 
         public Task<IEnumerable<KeyValuePair<CacheKey, T>>> GetRegionKeyValuesAsync<T>(KeyPrefix prefix)
         {
             List<KeyValuePair<CacheKey, T>> result = this.Sub(prefix)
                 .Where(i => i.Value.IsInvalidated == false)
-                .Select(kv => new KeyValuePair<CacheKey, T>(prefix + kv.Key, ((CacheValue<T>) kv.Value).Value))
+                .Select(kv => new KeyValuePair<CacheKey, T>(prefix + kv.Key, ((CacheValue<T>)kv.Value).Value))
                 .ToList();
             return Task.FromResult(result.AsEnumerable());
         }

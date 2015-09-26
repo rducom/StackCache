@@ -6,6 +6,7 @@ namespace StackCache.Core
     using System.Threading;
     using System.Threading.Tasks;
     using CacheKeys;
+    using Helpers;
     using Local.Dictionary;
     using Locking;
     using Messaging;
@@ -15,7 +16,7 @@ namespace StackCache.Core
         private readonly ICacheAdapter _distributedCache;
         private readonly ICacheAdapter _memoryCache;
         private readonly IMessenger _messenger;
-        private readonly string _identitifer = Guid.NewGuid().ToString();
+        private readonly string _identifier = Guid.NewGuid().ToString();
         private readonly string _genericChannel = ".";
 
         public Cache(ICacheAdapter memoryCache, ICacheAdapter distributedCache, IMessenger messenger)
@@ -23,28 +24,32 @@ namespace StackCache.Core
             this._distributedCache = distributedCache;
             this._memoryCache = memoryCache ?? new DictionaryCacheAdapter();
             this._messenger = messenger;
-            this._messenger?.Subscribe(this._genericChannel, this.OnNotification);
+            this._messenger?.Subscribe<DataNotification>(this._genericChannel, this.OnNotification);
         }
 
-        private void OnNotification(string channel, Notification notification)
+        private void OnNotification(string channel, DataNotification notification)
         {
-            if (notification == null || notification.Source == this._identitifer)
+            if (notification == null || notification.Source == this._identifier)
                 return;
 
-            switch (notification.Event)
+            var dn = notification as DataNotification;
+            if (dn == null)
+                return;
+
+            switch (dn.NotificationType)
             {
-                case Event.UpdatedItem:
-                    this._memoryCache.Invalidate(notification.Keys);
+                case NotificationType.UpdatedItem:
+                    this._memoryCache.Invalidate(dn.Keys);
                     break;
-                case Event.UpdatedRegion:
-                    this._memoryCache.Invalidate(notification.Keys);
+                case NotificationType.UpdatedRegion:
+                    this._memoryCache.Invalidate(dn.Keys);
                     break;
-                case Event.RemovedItem:
-                    foreach (CacheKey key in notification.Keys)
+                case NotificationType.RemovedItem:
+                    foreach (CacheKey key in dn.Keys)
                         this._memoryCache.Remove(key);
                     break;
-                case Event.RemovedRegion:
-                    foreach (CacheKey key in notification.Keys)
+                case NotificationType.RemovedRegion:
+                    foreach (CacheKey key in dn.Keys)
                         this._memoryCache.Remove(key);
                     break;
                 default:
@@ -70,6 +75,10 @@ namespace StackCache.Core
             }
         }
 
+        public ICacheAdapter DistributedCache => this._distributedCache;
+
+        public ICacheAdapter MemoryCache => this._memoryCache;
+
         public T Get<T>(CacheKey key)
         {
             T value;
@@ -85,7 +94,7 @@ namespace StackCache.Core
         {
             this._memoryCache?.Put(key, value);
             this._distributedCache?.Put(key, value);
-            this._messenger?.Notify(this._genericChannel, new Notification(this._identitifer, Event.UpdatedItem, key));
+            this._messenger?.Notify(this._genericChannel, new DataNotification(this._identifier, NotificationType.UpdatedItem, new[] { key }));
         }
 
         public void Remove(CacheKey key)
@@ -172,7 +181,7 @@ namespace StackCache.Core
             value = cacheValueCreator(key);
             this._memoryCache.Put(key, value);
             this._distributedCache?.Put(key, value);
-            this._messenger?.Notify(this._genericChannel, new Notification(this._identitifer, Event.UpdatedItem, key));
+            this._messenger?.Notify(this._genericChannel, new DataNotification(this._identifier, NotificationType.UpdatedItem, new[] { key }));
             return value;
         }
 
@@ -180,7 +189,7 @@ namespace StackCache.Core
         {
             this._memoryCache.PutRegion(values);
             this._distributedCache?.PutRegion(values);
-            this._messenger?.Notify(this._genericChannel, new Notification(this._identitifer, Event.UpdatedRegion, values.Select(i => i.Key).ToArray()));
+            this._messenger?.Notify(this._genericChannel, new DataNotification(this._identifier, NotificationType.UpdatedRegion, values.Select(i => i.Key).ToArray()));
         }
     }
 }

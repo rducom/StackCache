@@ -15,20 +15,18 @@ namespace StackCache.Core.Locking
             this._milliseconds = retryMilliseconds;
         }
 
-        public async Task<IDisposable> Lock(string key, TimeSpan timeout, CancellationToken cancellationToken)
+        public async Task<ILockState> Lock(string key, TimeSpan timeout, CancellationToken cancellationToken)
         {
+            await Task.Yield();
             RedisKey redisKey = key;
             RedisValue token = Environment.MachineName + Guid.NewGuid();
-            do
-            {
-                if (this._database.LockTake(redisKey, token, timeout))
-                    break;
-                await Task.Delay(this._milliseconds, cancellationToken);
-            } while (true);
-            return new RedisLockDispose(this._database, redisKey, token);
+            if (this._database.LockTake(redisKey, token, timeout))
+                return new RedisLockDispose(this._database, redisKey, token);
+            else
+                return new NotLockedState();
         }
 
-        class RedisLockDispose : IDisposable
+        class RedisLockDispose : ILockState
         {
             private readonly IDatabase _database;
             private readonly RedisKey _key;
@@ -46,6 +44,8 @@ namespace StackCache.Core.Locking
             {
                 this._database.LockRelease(this._key, this._value);
             }
+
+            public bool IsLockAcquired => true;
         }
     }
 }

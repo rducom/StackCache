@@ -6,20 +6,22 @@ namespace StackCache.Core.Stores
     using System.Threading.Tasks;
     using CacheKeys;
 
-    public abstract class PartialStorage<T, TKey> : IStorage<T, TKey>
+
+    public abstract class PartialStore<T, TKey> : IStore<T, TKey>
         where T : class
     {
         private readonly ICache _cache;
         private readonly IDatabaseSourcePartial<T, TKey> _source;
         private readonly IKeyConverter<T, TKey> _keyConverter;
 
-        protected PartialStorage(ICache cache, IDatabaseSourcePartial<T, TKey> source, IKeyConverter<T, TKey> keyConverter)
+        protected PartialStore(ICache cache, IDatabaseSourcePartial<T, TKey> source, IKeyConverter<T, TKey> keyConverter)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (keyConverter == null) throw new ArgumentNullException(nameof(keyConverter));
             this._cache = cache ?? Cache.Default;
             this._source = source;
             this._keyConverter = keyConverter;
+            this.StoreIdentifier = typeof(T).Name;
         }
 
         public async Task<T> Get(TKey key)
@@ -34,7 +36,7 @@ namespace StackCache.Core.Stores
             return value;
         }
 
-        public async Task<IEnumerable<T>> Get(IEnumerable<TKey> keys)
+        public async Task<IEnumerable<T>> Get(params TKey[] keys)
         {
             List<Task<T>> getters = keys.Select(this.Get).ToList();
             await Task.WhenAll(getters);
@@ -67,5 +69,7 @@ namespace StackCache.Core.Stores
                 }
             }
         }
+
+        public virtual string StoreIdentifier { get; }
     }
 }

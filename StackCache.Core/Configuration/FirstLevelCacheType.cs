@@ -4,7 +4,6 @@
     {
         None,
         ConcurrentDictionary,
-        //LockedDictionary,
-        //MemoryCache
+        MemoryCache
     }
 }

@@ -1,4 +1,4 @@
-namespace Caching.Test.Data
+namespace StackCache.Test.Data
 {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;

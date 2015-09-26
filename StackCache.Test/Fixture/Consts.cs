@@ -1,4 +1,4 @@
-namespace Caching.Test.Fixture
+namespace StackCache.Test.Fixture
 {
     public static class Consts
     {

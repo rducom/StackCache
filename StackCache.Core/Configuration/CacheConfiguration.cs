@@ -21,7 +21,7 @@
         private SecondLevelCacheType _secondLevelCacheType;
         private readonly SerializerType _serializerType;
         private int _redisDatabase;
-        private List<RedisInstance> _redisInstances;
+        private List<RedisServer> _redisInstances;
 
         public Cache CreateCache()
         {
@@ -78,12 +78,12 @@
             return this;
         }
 
-        public CacheConfiguration WithSecondLevel(int databaseId, params RedisInstance[] instances)
+        public CacheConfiguration WithSecondLevel(int databaseId, params RedisServer[] servers)
         {
-            if (instances == null) throw new ArgumentNullException(nameof(instances));
+            if (servers == null) throw new ArgumentNullException(nameof(servers));
             this._secondLevelCacheType = SecondLevelCacheType.Redis;
             this._redisDatabase = databaseId;
-            this._redisInstances = instances.ToList();
+            this._redisInstances = servers.ToList();
             return this;
         }
     }

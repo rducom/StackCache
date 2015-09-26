@@ -1,9 +1,10 @@
-namespace Caching.Test.Fixture
+namespace StackCache.Test.Fixture
 {
     using System;
     using System.Data.Entity;
     using Data;
-    using StackCache.Core;
+    using Core;
+    using Core.Election;
 
     public abstract class CacheFixture : IDisposable
     {
@@ -17,5 +18,7 @@ namespace Caching.Test.Fixture
         }
 
         public ICache Cache { get; protected set; }
+
+        public IElection Elector { get; set; }
     }
 }

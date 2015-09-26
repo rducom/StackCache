@@ -1,8 +1,14 @@
 namespace StackCache.Core.Stores
 {
-    public struct Crud<T>
+    public class Crud<T>
     {
-        public T Value { get; set; }
-        public CrudAction Action { get; set; }
+        public Crud(T value, CrudAction action)
+        {
+            this.Value = value;
+            this.Action = action;
+        }
+
+        public T Value { get; private set; }
+        public CrudAction Action { get; private set; }
     }
 }

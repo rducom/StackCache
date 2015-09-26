@@ -5,12 +5,12 @@ namespace StackCache.Test
     using Xunit.Abstractions;
 
     /// <summary>
-    /// Check cache without second level adapter
+    /// Check store without second level adapter
     /// </summary>
-    [Collection(Consts.Level1)]
-    public class Level1 : CacheTest
+    [Collection(Consts.Level2)]
+    public class StoreL2 : StoreTest
     {
-        public Level1(Level1Fixture fix, ITestOutputHelper output)
+        public StoreL2(Level2Fixture fix, ITestOutputHelper output)
             : base(fix, output)
         {
         }

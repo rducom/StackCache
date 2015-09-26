@@ -1,4 +1,4 @@
-namespace StackCache.Core
+namespace StackCache.Core.Helpers
 {
     using System;
 

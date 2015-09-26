@@ -16,15 +16,15 @@ namespace StackCache.Core.Distributed
     /// </summary>
     public class RedisCacheAdapter : ICacheAdapter, IMessenger
     {
-        public RedisCacheAdapter(IEnumerable<RedisInstance> redisInsances, int databaseNumber, ISerializer serializer)
+        public RedisCacheAdapter(IEnumerable<RedisServer> redisInstances, int databaseNumber, ISerializer serializer)
         {
-            List<RedisInstance> instances = redisInsances.ToList();
+            List<RedisServer> instances = redisInstances.ToList();
             this._databaseNumber = databaseNumber;
             this._serializer = serializer;
-            string connexion = string.Join(",", instances.Select(i => i.Hostname + ":" + i.Port)); //"server1:6379,server2:6379"
-            ConfigurationOptions redisOption = ConfigurationOptions.Parse(connexion);
+            string connection = string.Join(",", instances.Select(i => i.Hostname + ":" + i.Port)); //"server1:6379,server2:6379"
+            ConfigurationOptions redisOption = ConfigurationOptions.Parse(connection);
             ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(redisOption);
-            RedisInstance master = instances.First();
+            RedisServer master = instances.First();
             this._server = redis.GetServer(master.Hostname, master.Port);
             this._subscriber = redis.GetSubscriber();
             this._db = redis.GetDatabase(databaseNumber);
@@ -35,6 +35,8 @@ namespace StackCache.Core.Distributed
         private readonly ISerializer _serializer;
         private readonly IServer _server;
         private readonly ISubscriber _subscriber;
+
+        public CacheType CacheType => CacheType.Distributed;
 
         public bool Get<T>(CacheKey key, out T value)
         {
@@ -148,18 +150,18 @@ namespace StackCache.Core.Distributed
             }
         }
 
-        public void Notify(string channel, Notification notification)
+        public void Notify<T>(string channel, T notification) where T : INotification
         {
             if (channel == null) throw new ArgumentNullException(nameof(channel));
             if (notification == null) throw new ArgumentNullException(nameof(notification));
             this._subscriber.Publish(channel, notification.ToRedisValue(this._serializer));
         }
 
-        public void Subscribe(string channel, Action<string, Notification> onNotification)
+        public void Subscribe<T>(string channel, Action<string, T> onNotification) where T : INotification
         {
             if (channel == null) throw new ArgumentNullException(nameof(channel));
             if (onNotification == null) throw new ArgumentNullException(nameof(onNotification));
-            this._subscriber.Subscribe(channel, (chan, val) => { onNotification(chan, val.FromRedisValue<Notification>(this._serializer)); });
+            this._subscriber.Subscribe(channel, (chan, val) => { onNotification(chan, val.FromRedisValue<T>(this._serializer)); });
         }
     }
 }

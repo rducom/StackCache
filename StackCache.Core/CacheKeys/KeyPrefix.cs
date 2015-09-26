@@ -48,7 +48,7 @@ namespace StackCache.Core.CacheKeys
                 case 2:
                     return new KeyPrefix(splitted[0], splitted[1]);
             }
-            return KeyPrefix.Null;
+            return Null;
         }
 
         public string SearchPattern => this + Key.Separator + "*";

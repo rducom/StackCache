@@ -4,7 +4,7 @@ namespace StackCache.Core.Serializers
     using ProtoBuf;
 
     public class ProtoBufSerializer : ISerializer
-    { 
+    {
         public byte[] Serialize<T>(T item)
         {
             byte[] data;

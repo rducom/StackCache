@@ -1,12 +1,11 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
-
-namespace Caching.Test
+﻿namespace StackCache.Test
 {
-    using StackCache.Core.Locking;
+    using System;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Core.Locking;
+    using Xunit;
 
     public class AsyncStructs
     {

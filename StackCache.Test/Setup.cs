@@ -1,8 +1,8 @@
-﻿namespace Caching.Test
+﻿namespace StackCache.Test
 {
     using System;
-    using StackCache.Core;
-    using StackCache.Core.Configuration;
+    using Core;
+    using Core.Configuration;
     using Xunit;
 
     public class Setup
@@ -75,7 +75,7 @@
             ICache cache = null;
             Assert.Throws<ArgumentException>(() =>
             {
-                config.WithSecondLevel(0, new RedisInstance());
+                config.WithSecondLevel(0, new RedisServer());
                 cache = config.CreateCache();
             });
             Assert.Null(cache);
@@ -88,7 +88,7 @@
             ICache cache = null;
             Assert.Throws<ArgumentException>(() =>
             {
-                config.WithSecondLevel(0, new RedisInstance());
+                config.WithSecondLevel(0, new RedisServer());
                 cache = config.CreateCache();
             });
             Assert.Null(cache);

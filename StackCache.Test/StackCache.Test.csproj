@@ -75,10 +75,12 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="AsyncTest.cs" />
+    <Compile Include="AsyncStructs.cs" />
     <Compile Include="CacheTest.cs" />
+    <Compile Include="ConcurrentCaches.cs" />
     <Compile Include="Data\Customer.cs" />
     <Compile Include="Data\CustomerContext.cs" />
+    <Compile Include="Data\CustomerDomain.cs" />
     <Compile Include="Data\CustomersTestData.cs" />
     <Compile Include="Fixture\CacheFixture.cs" />
     <Compile Include="Fixture\Consts.cs" />
@@ -88,6 +90,12 @@
     <Compile Include="Fixture\Level2Test.cs" />
     <Compile Include="KeyTests.cs" />
     <Compile Include="Level1.cs" />
+    <Compile Include="Level2.cs" />
+    <Compile Include="Serialized.cs" />
+    <Compile Include="StoreL1.cs" />
+    <Compile Include="StoreL2.cs" />
+    <Compile Include="StoreTest.cs" />
+    <Compile Include="Store\CustomerSource.cs" />
     <Compile Include="Store\CustomerStore.cs" />
     <Compile Include="Setup.cs" />
     <Compile Include="Data\Order.cs" />

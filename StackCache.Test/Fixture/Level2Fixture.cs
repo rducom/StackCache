@@ -1,9 +1,10 @@
 
 
-namespace Caching.Test.Fixture
+namespace StackCache.Test.Fixture
 {
-    using System.Net;
-    using StackCache.Core.Configuration;
+    using Core;
+    using Core.Configuration;
+    using Core.Election;
 
     public class Level2Fixture : CacheFixture
     {
@@ -12,8 +13,11 @@ namespace Caching.Test.Fixture
         {
             CacheConfiguration config = new CacheConfiguration()
                  .WithFirstLevel(FirstLevelCacheType.ConcurrentDictionary)
-                 .WithSecondLevel(0, new RedisInstance() { Hostname = "127.0.0.1", Port = 6379 });
-            this.Cache = config.CreateCache(); ;
+                 .WithSecondLevel(0, new RedisServer() { Hostname = "127.0.0.1", Port = 6379 });
+
+            Cache cc = config.CreateCache();
+            this.Cache = cc;
+            this.Elector = new DistributedMutexElection(cc.DistributedCache);
         }
 
     }

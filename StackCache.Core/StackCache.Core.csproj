@@ -31,6 +31,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="protobuf-net, Version=2.0.0.668, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
       <HintPath>..\packages\protobuf-net.2.0.0.668\lib\net40\protobuf-net.dll</HintPath>
       <Private>True</Private>
@@ -40,6 +44,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -51,11 +56,24 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="CacheType.cs" />
+    <Compile Include="Configuration\Setting.cs" />
+    <Compile Include="Election\DistributedElection.cs" />
+    <Compile Include="Election\IElection.cs" />
+    <Compile Include="Election\ConfiguredElection.cs" />
+    <Compile Include="Helpers\ApplicationNode.cs" />
+    <Compile Include="Locking\AsyncLazy.cs" />
+    <Compile Include="Messaging\DataNotification.cs" />
+    <Compile Include="Messaging\INotification.cs" />
+    <Compile Include="Messaging\ProtoInherits.cs" />
     <Compile Include="Stores\Crud.cs" />
     <Compile Include="Cache.cs" />
     <Compile Include="CacheKeys\CacheKey.cs" />
-    <Compile Include="Stores\Storage.cs" />
-    <Compile Include="Stores\IStorage.cs" />
+    <Compile Include="Stores\ElectionMode.cs" />
+    <Compile Include="Stores\IDatabaseSourceGlobal.cs" />
+    <Compile Include="Stores\IDatabaseSourcePartial.cs" />
+    <Compile Include="Stores\Store.cs" />
+    <Compile Include="Stores\IStore.cs" />
     <Compile Include="CacheKeys\Key.cs" />
     <Compile Include="CacheKeys\KeyHelper.cs" />
     <Compile Include="CacheKeys\KeyPrefix.cs" />
@@ -63,10 +81,10 @@
     <Compile Include="Configuration\CacheConfiguration.cs" />
     <Compile Include="Configuration\FirstLevelCacheType.cs" />
     <Compile Include="Configuration\SecondLevelCacheType.cs" />
-    <Compile Include="Serializers\Serializer.cs" />
+    <Compile Include="Serializers\SerializerType.cs" />
     <Compile Include="Stores\CrudAction.cs" />
     <Compile Include="ICacheAdapterAsync.cs" />
-    <Compile Include="Stores\IDatabaseSource.cs" />
+    <Compile Include="Stores\IKeyConverter.cs" />
     <Compile Include="Stores\Management\LoadedInfo.cs" />
     <Compile Include="Locking\AsyncExclusive.cs" />
     <Compile Include="Locking\AsyncHelper.cs" />
@@ -76,7 +94,7 @@
     <Compile Include="ICache.cs" />
     <Compile Include="ICacheAdapter.cs" />
     <Compile Include="CacheValues\ICacheValue.cs" />
-    <Compile Include="Locking\LocalLocker.cs" />
+    <Compile Include="Locking\LocalLock.cs" />
     <Compile Include="Serializers\ISerializer.cs" />
     <Compile Include="Locking\ILock.cs" />
     <Compile Include="Locking\RedisLocker.cs" />
@@ -84,7 +102,7 @@
     <Compile Include="Messaging\IMessenger.cs" />
     <Compile Include="Messaging\Messenger.cs" />
     <Compile Include="Messaging\Notification.cs" />
-    <Compile Include="Stores\PartialStorage.cs" />
+    <Compile Include="Stores\PartialStore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Distributed\RedisCacheAdapter.cs" />
     <Compile Include="Configuration\RedisInstance.cs" />

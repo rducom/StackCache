@@ -1,6 +1,7 @@
-﻿namespace Caching.Test.Fixture
+﻿namespace StackCache.Test.Fixture
 {
-    using StackCache.Core.Configuration;
+    using Core.Configuration;
+    using Core.Election;
 
     public class Level1Fixture : CacheFixture
     {
@@ -9,6 +10,7 @@
             CacheConfiguration config = new CacheConfiguration()
                 .WithFirstLevel(FirstLevelCacheType.ConcurrentDictionary);
             this.Cache = config.CreateCache();
+            this.Elector = new ConfiguredElection(true);
         }
     }
 }

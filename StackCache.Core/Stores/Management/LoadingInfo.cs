@@ -1,4 +1,4 @@
-namespace StackCache.Core
+namespace StackCache.Core.Stores.Management
 {
     using System;
     using CacheKeys;

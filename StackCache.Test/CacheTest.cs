@@ -1,15 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Caching.Test.Fixture;
-using Xunit;
-using Xunit.Abstractions;
-
-namespace Caching.Test
+namespace StackCache.Test
 {
-    using StackCache.Core;
-    using StackCache.Core.CacheKeys;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Fixture;
+    using Core;
+    using Core.CacheKeys;
+    using Xunit;
+    using Xunit.Abstractions;
 
     public abstract class CacheTest
     {
@@ -89,27 +88,7 @@ namespace Caching.Test
                 Assert.Equal(dictionary[kv.Key].Property, kv.Value.Property);
             }
         }
-
-        //[Fact]
-        //public void ConcurentPut_Optimistic()
-        //{
-        //}
-
-        //[Fact]
-        //public void ConcurentPut_Pessimistic()
-        //{
-        //}
-
-        //[Fact]
-        //public void ExpiresAtFixedDate()
-        //{
-        //}
-
-        //[Fact]
-        //public void ExpiresAfterTimespan()
-        //{
-        //}
-
+         
         [Fact]
         public void CanRemove()
         {

@@ -15,19 +15,19 @@ namespace StackCache.Core.CacheKeys
     [ProtoContract]
     public struct CacheKey
     {
-        public CacheKey(KeyPrefix prefix, Key sufffix)
+        public CacheKey(KeyPrefix prefix, Key suffix)
             : this()
         {
             this._prefix = prefix;
-            this._suffix = sufffix;
+            this._suffix = suffix;
             this.ExpirationMode = ExpirationMode.None;
         }
 
-        public CacheKey(Key tenant, Key region, Key sufffix)
+        public CacheKey(Key tenant, Key region, Key suffix)
            : this()
         {
             this._prefix = new KeyPrefix(tenant, region);
-            this._suffix = sufffix;
+            this._suffix = suffix;
             this.ExpirationMode = ExpirationMode.None;
         }
 
@@ -140,7 +140,7 @@ namespace StackCache.Core.CacheKeys
                 case 3:
                     return new CacheKey(splitted[0], splitted[1], splitted[2]);
             }
-            return CacheKey._null;
+            return _null;
         }
     }
 }
