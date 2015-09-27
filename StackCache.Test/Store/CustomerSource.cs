@@ -3,6 +3,7 @@ namespace StackCache.Test.Store
     using System;
     using System.Collections.Generic;
     using System.Data.Entity;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
     using Core.Stores;
@@ -12,6 +13,11 @@ namespace StackCache.Test.Store
     {
         private readonly string _connection =
             @"Data Source=(LocalDb)\v11.0;Initial Catalog=TESTCACHE;Integrated Security=true";
+
+        public CustomerSource()
+        {
+            Debug.WriteLine("new CustomerSource()");
+        }
 
         public async Task<IEnumerable<CustomerDomain>> Load()
         {
@@ -28,45 +34,48 @@ namespace StackCache.Test.Store
         {
             using (var db = new CustomerContext(this._connection))
             {
-                foreach (Crud<CustomerDomain> crud in values)
+                using (DbContextTransaction t = db.Database.BeginTransaction())
                 {
-                    switch (crud.Action)
+                    foreach (Crud<CustomerDomain> crud in values)
                     {
-                        case CrudAction.Insert:
-                        case CrudAction.Update:
-                            {
-                                Customer found = null;
-                                if (crud.Value.Id.HasValue)
-                                    found =
-                                        await
-                                            db.Customers.FirstOrDefaultAsync(
-                                                i => i.Id.HasValue && i.Id.Value == crud.Value.Id.Value);
-                                if (found == null)
+                        switch (crud.Action)
+                        {
+                            case CrudAction.Insert:
+                            case CrudAction.Update:
                                 {
-                                    found = new Customer();
-                                    db.Customers.Add(found);
+                                    Customer found = null;
+                                    if (crud.Value.Id.HasValue)
+                                        found =
+                                            await
+                                                db.Customers.FirstOrDefaultAsync(
+                                                    i => i.Id.HasValue && i.Id.Value == crud.Value.Id.Value);
+                                    if (found == null)
+                                    {
+                                        found = new Customer();
+                                        db.Customers.Add(found);
+                                    }
+                                    found.Name = crud.Value.Name;
                                 }
-                                found.Name = crud.Value.Name;
-                            }
-                            break;
-                        case CrudAction.Delete:
-                            {
-                                if (crud.Value.Id.HasValue)
+                                break;
+                            case CrudAction.Delete:
                                 {
-                                    Customer found =
-                                        await
-                                            db.Customers.FirstOrDefaultAsync(
-                                                i => i.Id.HasValue && i.Id.Value == crud.Value.Id.Value);
-                                    if (found != null)
-                                        db.Customers.Remove(found);
+                                    if (crud.Value.Id.HasValue)
+                                    {
+                                        Customer found =
+                                            await
+                                                db.Customers.FirstOrDefaultAsync(
+                                                    i => i.Id.HasValue && i.Id.Value == crud.Value.Id.Value);
+                                        if (found != null)
+                                            db.Customers.Remove(found);
+                                    }
                                 }
-                            }
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                        }
                     }
+                    await db.SaveChangesAsync();
                 }
-                await db.SaveChangesAsync();
             }
         }
     }

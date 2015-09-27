@@ -41,7 +41,7 @@ namespace StackCache.Core.Stores
     {
         private readonly ICache _cache;
 
-        private readonly AsyncLazy<IEnumerable<T>> _loaderAsyncLazy;
+        private readonly AsyncLazy<bool> _loaderAsyncLazy;
         private readonly Func<IDatabaseSourceGlobal<T, TKey>> _source;
         private readonly IElection _elector;
         private bool _isLoaded;
@@ -55,34 +55,35 @@ namespace StackCache.Core.Stores
             this._cache = cache;
             this._source = source;
             this._elector = elector;
-            this._loaderAsyncLazy = new AsyncLazy<IEnumerable<T>>((Func<Task<IEnumerable<T>>>)this._source().Load);
+            this._loaderAsyncLazy = new AsyncLazy<bool>((Func<Task<bool>>)this.EnsureStoreReady);
         }
 
-        protected override Type StoreType => typeof (T);
+        protected override Type StoreType => typeof(T);
 
         protected override Key Tenant => this._cache.Tenant;
 
         public async Task<T> Get(TKey key)
         {
-            await this.EnsureLoaded();
+            await this.EnsureStoreReady();
             return this._cache.Get<T>(this.Prefix + this.ToKey(key));
         }
 
         public async Task<IEnumerable<T>> Get(params TKey[] keys)
         {
-            await this.EnsureLoaded();
+            await this.EnsureStoreReady();
             return
                 keys.Select(k => this._cache.Get<T>(this.Prefix + this.ToKey(k))).Where(t => t != null);
         }
 
         public async Task<IEnumerable<T>> GetAll()
         {
-            await this.EnsureLoaded();
+            await this.EnsureStoreReady();
             return this._cache.GetRegion<T>(this.Prefix, i => this.Prefix + this.ToKey(i));
         }
 
         public async Task Save(IEnumerable<Crud<T>> value)
         {
+            await this.EnsureStoreReady();
             IEnumerable<Crud<T>> enumerable = value as IList<Crud<T>> ?? value.ToList();
             IDatabaseSourceGlobal<T, TKey> source = this._source();
             await source.Save(enumerable);
@@ -107,27 +108,38 @@ namespace StackCache.Core.Stores
 
         protected abstract Key ToKey(T value);
 
+        private async Task<bool> EnsureStoreReady()
+        {
+            bool isLeader = await this.EnsureInitialized();
+            if (isLeader == false)
+            {
+                // TODO initialization fallback :
+                // TODO : if not leader, then check if other nodes exists, are leader, and are still working (no timeout, app blocking etc)
+                // if no, then be the leader ?
+                // if yes, then await for the next RegionChange notification, and return only when data is in L1
+            }
 
-        private async Task EnsureLoaded()
+            return true;
+        }
+
+        private async Task<bool> EnsureInitialized()
         {
             if (this._isLoaded)
-                return;
+                return false;
 
-            await this._elector.ExecuteIfLeader(ApplicationNode.Identifier, this.StoreIdentifier, async () =>
-            {
-                // If we are leader, then we try to load data from source
-                IEnumerable<T> values = await this._loaderAsyncLazy;
+            return await this._elector.ExecuteIfLeader(ApplicationNode.Identifier, this.StoreIdentifier, async () =>
+             {
+                 IDatabaseSourceGlobal<T, TKey> sourceInstance = this._source();
+                 // If we are leader, then we try to load data from source
+                 IEnumerable<T> values = await sourceInstance.Load();
 
-                KeyValuePair<CacheKey, T>[] keyValues =
-                    values.Select(i => new KeyValuePair<CacheKey, T>(this.Prefix + this.ToKey(i), i)).ToArray();
+                 KeyValuePair<CacheKey, T>[] keyValues =
+                     values.Select(i => new KeyValuePair<CacheKey, T>(this.Prefix + this.ToKey(i), i)).ToArray();
 
-                this._cache.PutRegion(keyValues);
-                this._isLoaded = true;
-            });
-
-            if (this._isLoaded)
-                return;
-
+                 this._cache.PutRegion(keyValues);
+                 this._isLoaded = true;
+                 return true;
+             });
         }
     }
 }

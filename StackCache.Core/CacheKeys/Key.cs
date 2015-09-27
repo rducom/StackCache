@@ -1,5 +1,6 @@
 namespace StackCache.Core.CacheKeys
 {
+    using System.Diagnostics;
     using System.Runtime.Serialization;
     using System.Text;
     using ProtoBuf;
@@ -8,6 +9,7 @@ namespace StackCache.Core.CacheKeys
     /// A Key is a chunk of key description. It can be used to define tenant, region, or identity part of a CacheKey
     /// </summary>
     [ProtoContract]
+    [DebuggerTypeProxy(typeof(KeyAsString))]
     public struct Key
     {
         [ProtoMember(1)]
@@ -26,7 +28,7 @@ namespace StackCache.Core.CacheKeys
         }
 
         internal bool IsNullOrEmpty => this._key == null || this._key.Length == 0;
-        
+
         public byte[] KeyData => this._key;
 
         /// <summary>
@@ -68,6 +70,16 @@ namespace StackCache.Core.CacheKeys
         public static implicit operator string (Key key)
         {
             return key == null ? null : Encoding.UTF8.GetString(key._key);
+        }
+
+        internal class KeyAsString
+        {
+            public string Key { get; set; }
+
+            public KeyAsString(Key key)
+            {
+                this.Key = key;
+            }
         }
     }
 }

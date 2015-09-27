@@ -15,7 +15,8 @@ namespace StackCache.Core.Local.Dictionary
 
         private ConcurrentDictionary<Key, ICacheValue> Sub(KeyPrefix prefix)
         {
-            return this._dic.GetOrAdd(prefix, p => new ConcurrentDictionary<Key, ICacheValue>());
+            var tmp = this._dic.GetOrAdd(prefix, p => new ConcurrentDictionary<Key, ICacheValue>());
+            return tmp;
         }
 
         public CacheType CacheType => CacheType.Local;
@@ -55,13 +56,14 @@ namespace StackCache.Core.Local.Dictionary
 
         public IEnumerable<T> GetRegion<T>(KeyPrefix prefix)
         {
-            return this.Sub(prefix).Values.OfType<CacheValue<T>>().Where(i => i.IsInvalidated == false).Select(i => i.Value);
+            var tmp = this.Sub(prefix).Values.OfType<CacheValue<T>>().Where(i => i.IsInvalidated == false).Select(i => i.Value).ToList();
+            return tmp;
         }
 
         public Task<IEnumerable<T>> GetRegionAsync<T>(KeyPrefix prefix)
         {
-            var result = this.Sub(prefix).Values.OfType<CacheValue<T>>().Where(i => i.IsInvalidated == false).Select(i => i.Value);
-            return Task.FromResult(result);
+            var result = this.Sub(prefix).Values.OfType<CacheValue<T>>().Where(i => i.IsInvalidated == false).Select(i => i.Value).ToList();
+            return Task.FromResult(result.AsEnumerable());
         }
 
         public Task<IEnumerable<KeyValuePair<CacheKey, T>>> GetRegionKeyValuesAsync<T>(KeyPrefix prefix)

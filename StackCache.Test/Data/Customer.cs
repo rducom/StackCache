@@ -7,6 +7,7 @@ namespace StackCache.Test.Data
     public class Customer
     {
         [Key]
+        [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
         public int? Id { get; set; }
         public string Name { get; set; }
     }

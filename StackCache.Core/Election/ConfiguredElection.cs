@@ -21,5 +21,12 @@
             if (this._isLeader)
                 await leaderAction();
         }
+
+        public async Task<T> ExecuteIfLeader<T>(string identity, string context, Func<Task<T>> leaderAction)
+        {
+            if (this._isLeader)
+                return await leaderAction();
+            return default(T);
+        }
     }
 }

@@ -29,5 +29,16 @@ namespace StackCache.Core.Election
                     await leaderAction();
             }
         }
+
+        public async Task<T> ExecuteIfLeader<T>(string identity, string context, Func<Task<T>> leaderAction)
+        {
+            ILock locker = this._distributedCache.GetLocker();
+            using (ILockState state = await locker.Lock(identity + context, TimeSpan.FromMinutes(1), CancellationToken.None))
+            {
+                if (state.IsLockAcquired)
+                  return  await leaderAction();
+            }
+            return default(T);
+        }
     }
 }
