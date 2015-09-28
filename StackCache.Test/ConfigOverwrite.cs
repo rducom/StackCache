@@ -54,7 +54,7 @@
             await Task.Delay(100);
 
             Assert.True(settingChanged);
-            Assert.True(found.ServerName == "localhost_test_update");
+            Assert.Equal("localhost_test_update",found.ServerName );
         }
     }
 }
