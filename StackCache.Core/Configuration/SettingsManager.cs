@@ -7,18 +7,23 @@ namespace StackCache.Core.Configuration
     using System.IO;
     using System.Reflection;
 
-    public class Settings
+    public class SettingsManager
     {
-        private static readonly Lazy<Settings> _lazy = new Lazy<Settings>(() => new Settings());
+        private static readonly Lazy<SettingsManager> _lazy = new Lazy<SettingsManager>(() => new SettingsManager());
         private bool _isInitialized;
         private string _configFolder;
 
-        private Settings()
+        private SettingsManager()
         {
             this.ConfigFolder = AppDomain.CurrentDomain.BaseDirectory;
         }
 
-        public static Settings Manager => _lazy.Value;
+        public static SettingsManager Default => _lazy.Value;
+
+        public static SettingsManager NewSettingsManager()
+        {
+            return new SettingsManager();
+        }
 
         /// <summary>
         /// Path where config files are stored

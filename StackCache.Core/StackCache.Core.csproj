@@ -61,7 +61,7 @@
     <Compile Include="Configuration\RedisServer.cs" />
     <Compile Include="Configuration\RedisSetting.cs" />
     <Compile Include="Configuration\Setting.cs" />
-    <Compile Include="Configuration\Settings.cs" />
+    <Compile Include="Configuration\SettingsManager.cs" />
     <Compile Include="Election\DistributedMutexElection.cs" />
     <Compile Include="Election\IElection.cs" />
     <Compile Include="Election\ConfiguredElection.cs" />

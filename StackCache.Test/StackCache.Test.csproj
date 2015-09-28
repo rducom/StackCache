@@ -83,7 +83,8 @@
     <Compile Include="AsyncStructs.cs" />
     <Compile Include="CacheTest.cs" />
     <Compile Include="ConcurrentCaches.cs" />
-    <Compile Include="Config.cs" />
+    <Compile Include="ConfigOverwrite.cs" />
+    <Compile Include="ConfigBasics.cs" />
     <Compile Include="Data\Customer.cs" />
     <Compile Include="Data\CustomerContext.cs" />
     <Compile Include="Data\CustomerDomain.cs" />

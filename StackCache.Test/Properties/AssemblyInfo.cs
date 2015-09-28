@@ -9,4 +9,4 @@ using Xunit;
 [assembly: Guid("6ae81c87-7b58-4a77-bcf2-be7c15ee0412")]
 
 
-[assembly: CollectionBehavior(DisableTestParallelization = true)]
+//[assembly: CollectionBehavior(DisableTestParallelization = true, MaxParallelThreads = 1)]

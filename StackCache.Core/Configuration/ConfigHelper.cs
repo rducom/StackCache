@@ -7,22 +7,41 @@ namespace StackCache.Core.Configuration
 
     internal static class ConfigHelper
     {
+
+
         internal static T LoadAsJson<T>(this FileInfo configFile) where T : Setting, new()
-        {
-            var config = new T();
-            using (StreamReader sr = File.OpenText(configFile.FullName))
+        { 
+            try
             {
-                var serializer = new JsonSerializer { ContractResolver = new CamelCasePropertyNamesContractResolver() };
-                return (T)serializer.Deserialize(sr, typeof(T));
+                using (StreamReader sr = File.OpenText(configFile.FullName))
+                {
+                    var serializer = new JsonSerializer
+                    {
+                        ContractResolver = new CamelCasePropertyNamesContractResolver()
+                    };
+                    return (T) serializer.Deserialize(sr, typeof (T));
+                }
             }
+            catch (Exception)
+            {
+                // TODO : log
+            }
+            return default(T);
         }
 
         internal static void SaveAsJson<T>(this FileInfo configFile, T configData) where T : Setting
         {
-            using (StreamWriter sr = File.CreateText(configFile.FullName))
+            try
+            {
+                using (StreamWriter sr = File.CreateText(configFile.FullName))
             {
                 var serializer = new JsonSerializer { ContractResolver = new CamelCasePropertyNamesContractResolver() };
                 serializer.Serialize(sr, configData, typeof(T));
+            }
+            }
+            catch (Exception)
+            {
+                // TODO : log
             }
         }
 
