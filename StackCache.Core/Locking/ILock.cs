@@ -19,18 +19,4 @@ namespace StackCache.Core.Locking
         /// <returns>Returns and ILockState instance, which MUST be disposed (to release the lock)</returns>
         Task<ILockState> Lock(string key, TimeSpan timeout, CancellationToken cancellationToken);
     }
-
-    public interface ILockState : IDisposable
-    {
-        bool IsLockAcquired { get; }
-    }
-
-    public class NotLockedState : ILockState
-    {
-        public void Dispose()
-        {
-        }
-
-        public bool IsLockAcquired => false;
-    }
 }

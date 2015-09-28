@@ -13,7 +13,7 @@ namespace StackCache.Test.Fixture
         {
             CacheConfiguration config = new CacheConfiguration()
                  .WithFirstLevel(FirstLevelCacheType.ConcurrentDictionary)
-                 .WithSecondLevel(0, new RedisServer() { Hostname = "127.0.0.1", Port = 6379 });
+                 .WithSecondLevel(0, new RedisServer { Hostname = "127.0.0.1", Port = 6379 });
 
             Cache cc = config.CreateCache();
             this.Cache = cc;

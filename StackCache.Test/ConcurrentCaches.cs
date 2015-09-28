@@ -9,13 +9,13 @@ namespace StackCache.Test
     public class ConcurrentCaches
     {
         private const string _keySerialized = "42Concurent";
-        private static readonly Serialized _dataSerialized = new Serialized() { Property = "forty two concurrent property" };
+        private static readonly Serialized _dataSerialized = new Serialized { Property = "forty two concurrent property" };
 
         public ConcurrentCaches()
         {
             CacheConfiguration config = new CacheConfiguration();
             config.WithFirstLevel(FirstLevelCacheType.ConcurrentDictionary);
-            config.WithSecondLevel(0, new RedisServer() { Hostname = "127.0.0.1", Port = 6379 });
+            config.WithSecondLevel(0, new RedisServer { Hostname = "127.0.0.1", Port = 6379 });
 
             this._cache1 = config.CreateCache();
             this._cache2 = config.CreateCache();

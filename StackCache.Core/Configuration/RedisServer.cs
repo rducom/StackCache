@@ -1,18 +1,5 @@
 namespace StackCache.Core.Configuration
 {
-    using System;
-    using System.Collections.Generic;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public class RedisInstance
-    {
-        public String Name { get; set; }
-
-        public List<RedisServer> Servers { get; set; }
-    }
-
     /// <summary>
     /// Redis server description
     /// </summary>

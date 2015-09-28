@@ -57,13 +57,20 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="CacheType.cs" />
+    <Compile Include="Configuration\ConfigHelper.cs" />
+    <Compile Include="Configuration\RedisServer.cs" />
+    <Compile Include="Configuration\RedisSetting.cs" />
     <Compile Include="Configuration\Setting.cs" />
-    <Compile Include="Election\DistributedElection.cs" />
+    <Compile Include="Configuration\Settings.cs" />
+    <Compile Include="Election\DistributedMutexElection.cs" />
     <Compile Include="Election\IElection.cs" />
     <Compile Include="Election\ConfiguredElection.cs" />
     <Compile Include="Helpers\ApplicationNode.cs" />
+    <Compile Include="Helpers\WrapDisposable.cs" />
     <Compile Include="Locking\AsyncLazy.cs" />
+    <Compile Include="Locking\ILockState.cs" />
     <Compile Include="Locking\LocalLock.cs" />
+    <Compile Include="Locking\NotLockedState.cs" />
     <Compile Include="Messaging\DataNotification.cs" />
     <Compile Include="Messaging\INotification.cs" />
     <Compile Include="Messaging\ProtoInherits.cs" />
@@ -86,7 +93,6 @@
     <Compile Include="Stores\CrudAction.cs" />
     <Compile Include="ICacheAdapterAsync.cs" />
     <Compile Include="Stores\IKeyConverter.cs" />
-    <Compile Include="Stores\Management\LoadedInfo.cs" />
     <Compile Include="Locking\AsyncExclusive.cs" />
     <Compile Include="Locking\AsyncHelper.cs" />
     <Compile Include="Locking\AsyncLock.cs" />
@@ -98,18 +104,14 @@
     <Compile Include="Serializers\ISerializer.cs" />
     <Compile Include="Locking\ILock.cs" />
     <Compile Include="Locking\RedisLocker.cs" />
-    <Compile Include="Messaging\Event.cs" />
+    <Compile Include="Messaging\NotificationType.cs" />
     <Compile Include="Messaging\IMessenger.cs" />
-    <Compile Include="Messaging\Messenger.cs" />
-    <Compile Include="Messaging\Notification.cs" />
     <Compile Include="Stores\PartialStore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Distributed\RedisCacheAdapter.cs" />
-    <Compile Include="Configuration\RedisInstance.cs" />
     <Compile Include="Serializers\ProtoBufSerializer.cs" />
-    <Compile Include="Stores\Management\LoadingInfo.cs" />
     <Compile Include="Distributed\RedisTypeHelper.cs" />
-    <Compile Include="Helpers\WrapDisposable.cs" />
+    <Compile Include="Stores\StoreBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

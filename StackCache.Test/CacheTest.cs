@@ -30,7 +30,7 @@ namespace StackCache.Test
         private const int _dataInteger = 42;
 
         private const string _keySerialized = "42Serial";
-        private static readonly Serialized _dataSerialized = new Serialized() { Property = "forty two property" };
+        private static readonly Serialized _dataSerialized = new Serialized { Property = "forty two property" };
 
         [Fact]
         public void PutGetString()
@@ -78,7 +78,7 @@ namespace StackCache.Test
             KeyPrefix prefix = new KeyPrefix(KeyPrefix.Null, _keyString);
 
             Dictionary<CacheKey, Serialized> dictionary = Enumerable.Range(0, 100)
-                .ToDictionary(i => new CacheKey(prefix, i.ToString()), i => new Serialized() { Property = _dataString + i.ToString() });
+                .ToDictionary(i => new CacheKey(prefix, i.ToString()), i => new Serialized { Property = _dataString + i.ToString() });
 
             this.Cache.PutRegion(dictionary.ToArray());
             var fetched = await this.Cache.GetRegionKeyValuesAsync<Serialized>(prefix);
