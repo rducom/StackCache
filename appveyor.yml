@@ -17,5 +17,5 @@ environment:
     secure: kwZmZVMlkMBfoLy7tJOcm4emlFLrdRkvoIKbGSKXTDQ/21dbDg30yrSG5/dvtEJ0
 
 after_test:
-- packages\OpenCover.4.6.210-rc\tools\OpenCover.Console.exe -register:user -target:"packages\xunit.runner.console.2.1.0\tools\xunit.console.exe" -targetargs:"StackCache.Test\bin\Debug\StackCache.Test.dll -noshadow" -filter:"+[StackCache*]* -[StackCache.Test]*" -output:opencovertests.xml -coverbytest:*.Test.dll
+- packages\OpenCover.4.6.210-rc\tools\OpenCover.Console.exe -register:user -target:"packages\xunit.runner.console.2.0.0\tools\xunit.console.exe" -targetargs:"StackCache.Test\bin\Debug\StackCache.Test.dll -noshadow" -filter:"+[StackCache*]* -[StackCache.Test]*" -output:opencovertests.xml -coverbytest:*.Test.dll
 - packages\coveralls.io.1.3.4\tools\coveralls.net.exe --opencover opencovertests.xml --debug

@@ -114,10 +114,10 @@
     <Compile Include="Stores\StoreBase.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <Folder Include="Local\MemoryCache\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Local\MemoryCache\" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
