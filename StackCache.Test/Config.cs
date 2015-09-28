@@ -18,7 +18,7 @@
             var basetests = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
             if (basetests.Parent?.Parent != null)
                 this._root = basetests.Parent.Parent.FullName;
-
+            Settings.Manager.ConfigFolder = this._root;
             this._configsSettings = new Setting[]
         {
                 new RedisSetting
@@ -44,7 +44,7 @@
         [Fact]
         public void LoadDefaultConfigs()
         {
-            Settings.Manager.ConfigFolder = this._root;
+
             RedisSetting found = Settings.Manager.GetSetting<RedisSetting>();
 
             Assert.NotNull(found);
@@ -59,11 +59,10 @@
         [Fact]
         public void TestAlreadyInitializedSettings()
         {
-            Settings.Manager.ConfigFolder = this._root;
-            RedisSetting found = Settings.Manager.GetSetting<RedisSetting>();
-            Settings.Manager.ConfigFolder = this._root;
-
-            Assert.Throws<ConfigurationErrorsException>(() => { Settings.Manager.ConfigFolder = this._root + @"\1\"; });
+            Assert.Throws<ConfigurationErrorsException>(() =>
+            {
+                Settings.Manager.ConfigFolder = this._root + @"\1\";
+            });
         }
 
     }

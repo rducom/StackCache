@@ -1,10 +1,1 @@
-{
-  "serverName": "localhost",
-  "redisInstances": [
-    {
-      "hostname": "127.0.0.1",
-      "port": 6379,
-      "password": null
-    }
-  ]
-}
+{"serverName":"localhost","redisInstances":[{"hostname":"127.0.0.1","port":6379,"password":null}]}
