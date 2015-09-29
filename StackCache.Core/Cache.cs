@@ -98,7 +98,7 @@ namespace StackCache.Core
             if (keyFromValue == null) throw new ArgumentNullException(nameof(keyFromValue));
 
             IEnumerable<T> values = this.MemoryCache.GetRegion<T>(prefix);
-            if (values != null)
+            if (values != null && values.Any())
                 return values;
             if (this.DistributedCache != null)
                 values = this.DistributedCache.GetRegion<T>(prefix);
@@ -113,7 +113,7 @@ namespace StackCache.Core
         public async Task<IEnumerable<T>> GetRegionAsync<T>(KeyPrefix prefix, Func<T, CacheKey> keyFromValue)
         {
             IEnumerable<T> values = await this.MemoryCache.GetRegionAsync<T>(prefix);
-            if (values != null)
+            if (values != null && values.Any())
                 return values;
             if (this.DistributedCache != null)
                 values = await this.DistributedCache.GetRegionAsync<T>(prefix);
@@ -128,7 +128,7 @@ namespace StackCache.Core
         public async Task<IEnumerable<KeyValuePair<CacheKey, T>>> GetRegionKeyValuesAsync<T>(KeyPrefix prefix)
         {
             IEnumerable<KeyValuePair<CacheKey, T>> values = await this.MemoryCache.GetRegionKeyValuesAsync<T>(prefix);
-            if (values != null)
+            if (values != null && values.Any())
                 return values;
             if (this.DistributedCache != null)
                 values = await this.DistributedCache.GetRegionKeyValuesAsync<T>(prefix);

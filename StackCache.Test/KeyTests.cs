@@ -1,6 +1,7 @@
 ﻿namespace StackCache.Test
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using Core.CacheKeys;
     using Core.Serializers;
@@ -9,18 +10,39 @@
     public class KeyTests
     {
         [Fact]
+        public void Affectation()
+        {
+            Key k1 = "ppppp";
+            KeyPrefix p1 = new KeyPrefix(Key.Null, "1651651645621");
+            CacheKey cc = new CacheKey(p1, k1);
+            CacheKey affected = cc;
+            Assert.True(cc == affected);
+            var kv = new KeyValuePair<CacheKey, object>(affected, null);
+            Assert.Equal(cc, kv.Key);
+        }
+
+        [Fact]
+        public void KeyHash()
+        {
+            CacheKey k1 = new CacheKey(string.Empty, "646846516584", "57");
+            Dictionary<CacheKey, object> dic = new Dictionary<CacheKey, object>();
+            dic.Add(k1, new object());
+            var found = dic[k1];
+            Assert.NotNull(found);
+        }
+
+        [Fact]
         public void KeyTranstypeString()
         {
             Key k1 = "test";
             Assert.True(k1 == "test");
         }
 
-
         [Fact]
         public void KeyPrefixTranstypeString()
         {
-            KeyPrefix p1 = "test";
-            Assert.True(p1 == "test");
+            KeyPrefix p1 = new KeyPrefix("test", Key.Null);
+            Assert.True(p1.Tenant == "test");
         }
 
         [Fact]
@@ -58,6 +80,5 @@
                 Assert.True(cc == newcc);
             }
         }
-
     }
 }

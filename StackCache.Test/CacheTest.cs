@@ -21,7 +21,7 @@ namespace StackCache.Test
             this._output = output;
         }
 
-        protected ICache Cache => this._fix.Cache;
+        private ICache _cache => this._fix.Cache;
 
         private const string _keyString = "42String";
         private const string _dataString = "forty two";
@@ -35,36 +35,54 @@ namespace StackCache.Test
         [Fact]
         public void PutGetString()
         {
-            this.Cache.Put(_keyString, _dataString);
-            var found = this.Cache.Get<string>(_keyString);
+            this._cache.Put(_keyString, _dataString);
+            var found = this._cache.Get<string>(_keyString);
             Assert.Equal(found, _dataString);
+        }
+
+
+        [Fact]
+        public void CacheDefault()
+        {
+            var d1 = Cache.Default;
+            var d2 = Cache.Default;
+            Assert.Equal(d1, d2);
         }
 
         [Fact]
         public void PutGetInt()
         {
-            this.Cache.Put(_keyInteger, _dataInteger);
-            var found = this.Cache.Get<int>(_keyInteger);
+            this._cache.Put(_keyInteger, _dataInteger);
+            var found = this._cache.Get<int>(_keyInteger);
             Assert.Equal(found, _dataInteger);
+        }
+
+
+        [Fact]
+        public void PutGetOrCreate()
+        {
+            var temp1 = this._cache.GetOrCreate("42", (k) => 42);
+            var temp2 = this._cache.GetOrCreate("42", (k) => 42);
+            Assert.Equal(temp1, temp2);
         }
 
         [Fact]
         public void PutGetSerialized()
         {
-            this.Cache.Put(_keySerialized, _dataSerialized);
-            var found = this.Cache.Get<Serialized>(_keySerialized);
+            this._cache.Put(_keySerialized, _dataSerialized);
+            var found = this._cache.Get<Serialized>(_keySerialized);
             Assert.Equal(found.Property, _dataSerialized.Property);
         }
 
         [Fact]
         public async Task PutGetStringRegion()
         {
-            KeyPrefix prefix = new KeyPrefix(KeyPrefix.Null, _keyString);
+            KeyPrefix prefix = new KeyPrefix(Key.Null, _keyString);
             Dictionary<CacheKey, string> dictionary = Enumerable.Range(0, 100)
                 .ToDictionary(i => new CacheKey(prefix, i.ToString()), i => _dataString + i.ToString());
-            this.Cache.PutRegion(dictionary.ToArray());
+            this._cache.PutRegion(dictionary.ToArray());
 
-            var fetched = await this.Cache.GetRegionKeyValuesAsync<string>(prefix);
+            var fetched = await this._cache.GetRegionKeyValuesAsync<string>(prefix);
             Assert.Equal(dictionary.Count(), fetched.Count());
             foreach (var kv in fetched)
             {
@@ -75,41 +93,41 @@ namespace StackCache.Test
         [Fact]
         public async Task PutGetSerializedRegion()
         {
-            KeyPrefix prefix = new KeyPrefix(KeyPrefix.Null, _keyString);
+            KeyPrefix prefix = new KeyPrefix(Key.Null, _keyString);
 
             Dictionary<CacheKey, Serialized> dictionary = Enumerable.Range(0, 100)
                 .ToDictionary(i => new CacheKey(prefix, i.ToString()), i => new Serialized { Property = _dataString + i.ToString() });
 
-            this.Cache.PutRegion(dictionary.ToArray());
-            var fetched = await this.Cache.GetRegionKeyValuesAsync<Serialized>(prefix);
+            this._cache.PutRegion(dictionary.ToArray());
+            var fetched = await this._cache.GetRegionKeyValuesAsync<Serialized>(prefix);
             Assert.Equal(dictionary.Count(), fetched.Count());
             foreach (var kv in fetched)
             {
                 Assert.Equal(dictionary[kv.Key].Property, kv.Value.Property);
             }
         }
-         
+
         [Fact]
         public void CanRemove()
         {
-            this.Cache.Put(_keyString, _dataString);
-            var found = this.Cache.Get<string>(_keyString);
+            this._cache.Put(_keyString, _dataString);
+            var found = this._cache.Get<string>(_keyString);
             Assert.Equal(found, _dataString);
-            this.Cache.Remove(_keyString);
-            Assert.Null(this.Cache.Get<string>(_keyString));
+            this._cache.Remove(_keyString);
+            Assert.Null(this._cache.Get<string>(_keyString));
         }
 
         [Fact]
         public async Task CanRemoveRegion()
         {
-            KeyPrefix prefix = new KeyPrefix(KeyPrefix.Null, _keyString);
+            KeyPrefix prefix = new KeyPrefix(Key.Null, _keyString);
             Dictionary<CacheKey, string> dictionary = Enumerable.Range(0, 100)
                 .ToDictionary(i => new CacheKey(prefix, i.ToString()), i => _dataString + i.ToString());
-            this.Cache.PutRegion(dictionary.ToArray());
-            var fetched = await this.Cache.GetRegionKeyValuesAsync<string>(prefix);
+            this._cache.PutRegion(dictionary.ToArray());
+            var fetched = await this._cache.GetRegionKeyValuesAsync<string>(prefix);
             Assert.Equal(dictionary.Count(), fetched.Count());
-            this.Cache.RemoveRegion(prefix);
-            IEnumerable<KeyValuePair<CacheKey, Serialized>> removed = await this.Cache.GetRegionKeyValuesAsync<Serialized>(prefix);
+            this._cache.RemoveRegion(prefix);
+            IEnumerable<KeyValuePair<CacheKey, Serialized>> removed = await this._cache.GetRegionKeyValuesAsync<Serialized>(prefix);
             Assert.Empty(removed);
         }
 
@@ -118,8 +136,8 @@ namespace StackCache.Test
         {
             Assert.ThrowsAny<Exception>(() =>
             {
-                this.Cache.Put(_keySerialized, _dataSerialized);
-                this.Cache.Get<string>(_keySerialized);
+                this._cache.Put(_keySerialized, _dataSerialized);
+                this._cache.Get<string>(_keySerialized);
             });
         }
 

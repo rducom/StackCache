@@ -85,14 +85,17 @@ namespace StackCache.Core.Distributed
         {
             // TODO : evaluate performance -> this may be the slower
             IEnumerable<RedisKey> keys = this._server.Keys(this._databaseNumber, prefix.SearchPattern);
-            return await Task.WhenAll(
+
+            KeyValuePair<CacheKey, T>[] result = await Task.WhenAll(
                  keys.Select(async k =>
                  {
                      RedisValue value = await this._db.StringGetAsync(k);
                      return new KeyValuePair<CacheKey, T>(k, value.FromRedisValue<T>(this._serializer));
                  }));
-        }
 
+            return result;
+        } 
+          
         public void Invalidate(params CacheKey[] key)
         {
             throw new NotImplementedException();

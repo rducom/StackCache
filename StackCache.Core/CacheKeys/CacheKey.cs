@@ -1,16 +1,14 @@
 namespace StackCache.Core.CacheKeys
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Runtime.Serialization;
     using ProtoBuf;
     using StackExchange.Redis;
 
     /// <summary>
-    /// CacheKey is a key defined by a prefix and a identity key
-    /// Prefix intends to optimize cache regions and can be null
-    /// Key intends to identity a single item and must be unique in a region
+    /// CacheKey is a key defined by a prefix and an identity key
+    /// Prefix intends to optimize cache regions and can be Null
+    /// Suffix intends to identify a single item and must be unique in a region
     /// </summary>
     [ProtoContract]
     public struct CacheKey
@@ -24,7 +22,7 @@ namespace StackCache.Core.CacheKeys
         }
 
         public CacheKey(Key tenant, Key region, Key suffix)
-           : this()
+            : this()
         {
             this._prefix = new KeyPrefix(tenant, region);
             this._suffix = suffix;
@@ -33,24 +31,26 @@ namespace StackCache.Core.CacheKeys
 
         // this constructor is used for deserialization
         public CacheKey(SerializationInfo info, StreamingContext text)
-                : this()
+            : this()
         {
-            this._prefix = (KeyPrefix)info.GetValue(nameof(this.Prefix), typeof(KeyPrefix));
-            this._suffix = (Key)info.GetValue(nameof(this.Suffix), typeof(Key));
+            this._prefix = (KeyPrefix) info.GetValue(nameof(this.Prefix), typeof (KeyPrefix));
+            this._suffix = (Key) info.GetValue(nameof(this.Suffix), typeof (Key));
         }
-         
-        private static readonly CacheKey _null = new CacheKey(null, null, null);
 
-        [ProtoMember(1)]
-        private readonly KeyPrefix _prefix;
+        private static readonly CacheKey _null = new CacheKey(Key.Null, Key.Null, Key.Null);
 
-        [ProtoMember(2)]
-        private readonly Key _suffix;
+        [ProtoMember(1)] private readonly KeyPrefix _prefix;
 
-        
+        [ProtoMember(2)] private readonly Key _suffix;
+
+        /// <summary>
+        /// CacheKey Prefix identifies Tenant + Region
+        /// </summary>
         public KeyPrefix Prefix => this._prefix;
 
-        
+        /// <summary>
+        /// CacheKey Suffix identifies a single item in a KeyPrefix region
+        /// </summary>
         public Key Suffix => this._suffix;
 
         public ExpirationMode ExpirationMode { get; private set; }
@@ -65,14 +65,17 @@ namespace StackCache.Core.CacheKeys
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
-            return obj is CacheKey && this.Equals((CacheKey)obj);
+            return obj is CacheKey && this.Equals((CacheKey) obj);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                return (this.Prefix.GetHashCode() * 397) ^ this.Suffix.GetHashCode();
+                int hash = 17;
+                hash = hash*29 + this.Prefix.GetHashCode();
+                hash = hash*29 + this.Suffix.GetHashCode();
+                return hash;
             }
         }
 
@@ -106,41 +109,42 @@ namespace StackCache.Core.CacheKeys
 
         public override string ToString()
         {
-            return this;
+            return Key.Separator + this.Prefix.Tenant + Key.Separator + this.Prefix.Region + Key.Separator + this.Suffix;
         }
 
         public static implicit operator RedisKey(CacheKey key)
         {
-            return (string)key;
+            return (string) key;
         }
 
         public static implicit operator CacheKey(RedisKey key)
         {
-            return (string)key;
+            return (string) key;
         }
 
-        public static implicit operator string (CacheKey key)
+        public static implicit operator string(CacheKey key)
         {
-            return key.Prefix + Key.Separator + key.Suffix;
+            return key.ToString();
         }
 
         public static implicit operator CacheKey(string key)
         {
             if (key == null)
                 return _null;
-            List<string> splitted = key.Split(Key.Separator).ToList();
-            switch (splitted.Count)
+            string[] splitted = key.Split(Key.Separator);
+            switch (splitted.Length)
             {
-                case 0:
-                    return _null;
                 case 1:
-                    return new CacheKey(null, null, splitted[0]);
+                    return new CacheKey(Key.Null, Key.Null, splitted[0]);
                 case 2:
-                    return new CacheKey(null, splitted[0], splitted[1]);
+                    return new CacheKey(Key.Null, splitted[0], splitted[1]);
                 case 3:
                     return new CacheKey(splitted[0], splitted[1], splitted[2]);
+                case 4:
+                    return new CacheKey(splitted[1], splitted[2], splitted[3]);
+                default:
+                    return _null;
             }
-            return _null;
         }
     }
 }

@@ -1,8 +1,5 @@
 namespace StackCache.Core.CacheKeys
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Runtime.Serialization;
     using ProtoBuf;
 
@@ -12,7 +9,7 @@ namespace StackCache.Core.CacheKeys
     [ProtoContract]
     public struct KeyPrefix
     {
-        public KeyPrefix(string tenant, string region)
+        public KeyPrefix(Key tenant, Key region)
             : this()
         {
             this._tenant = tenant;
@@ -20,7 +17,7 @@ namespace StackCache.Core.CacheKeys
         }
 
         public KeyPrefix(SerializationInfo info, StreamingContext text)
-                : this()
+            : this()
         {
             this._tenant = (Key)info.GetValue(nameof(this.Tenant), typeof(Key));
             this._region = (Key)info.GetValue(nameof(this.Region), typeof(Key));
@@ -29,31 +26,9 @@ namespace StackCache.Core.CacheKeys
         public Key Tenant => this._tenant;
         public Key Region => this._region;
 
-        public static implicit operator string(KeyPrefix key)
-        {
-            return key.Tenant + Key.Separator + key.Region;
-        }
+        public string SearchPattern => new CacheKey(this, "*");
 
-        public static implicit operator KeyPrefix(string key)
-        {
-            if (key == null)
-                return Null;
-            List<string> splitted = key.Split(Key.Separator).ToList();
-            switch (splitted.Count)
-            {
-                case 0:
-                    return Null;
-                case 1:
-                    return new KeyPrefix(null, splitted[0]);
-                case 2:
-                    return new KeyPrefix(splitted[0], splitted[1]);
-            }
-            return Null;
-        }
-
-        public string SearchPattern => this + Key.Separator + "*";
-
-        public static KeyPrefix Null = new KeyPrefix(null, null);
+        public static KeyPrefix Null = new KeyPrefix(Key.Null, Key.Null);
 
         [ProtoMember(1)]
         private readonly Key _tenant;
@@ -84,12 +59,25 @@ namespace StackCache.Core.CacheKeys
             return this == other;
         }
 
+        //public override int GetHashCode()
+        //{
+        //    int hash1 = this.Tenant.IsNullOrEmpty ? 0 : this.Tenant.GetHashCode();
+        //    int hash2 = this.Region.IsNullOrEmpty ? 0 : this.Region.GetHashCode();
+        //    return unchecked((31*hash1) + hash2);
+        //}
+
         public override int GetHashCode()
         {
-            int hash1 = this.Tenant.IsNullOrEmpty ? 0 : this.Tenant.GetHashCode();
-            int hash2 = this.Region.IsNullOrEmpty ? 0 : this.Region.GetHashCode();
-            return unchecked((31 * hash1) + hash2);
+            unchecked
+            {
+                int hash = 17 * 29 + this.Tenant.GetHashCode();
+                return hash * 29 + this.Region.GetHashCode();
+            }
         }
 
+        public override string ToString()
+        {
+            return Key.Separator + this.Tenant + Key.Separator + this.Region;
+        }
     }
 }
