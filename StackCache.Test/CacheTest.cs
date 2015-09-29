@@ -75,6 +75,41 @@ namespace StackCache.Test
         }
 
         [Fact]
+        public void GetRegionArgument()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                this._cache.GetRegion<String>(new KeyPrefix("123", "456"), null);
+            });
+        }
+
+        [Fact]
+        public void GetEmptyRegion()
+        {
+            Func<Serialized, CacheKey> funk = s => new CacheKey(new KeyPrefix("8754", "9765"), s.Id.ToString());
+            IEnumerable<Serialized> result = this._cache.GetRegion(new KeyPrefix("123", "456"), funk);
+            Assert.Empty(result);
+        }
+
+
+        [Fact]
+        public async Task GetRegionAsyncArgument()
+        {
+            await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            {
+                await this._cache.GetRegionAsync<String>(new KeyPrefix("123", "456"), null);
+            });
+        }
+
+        [Fact]
+        public async Task GetEmptyRegionAsync()
+        {
+            Func<Serialized, CacheKey> funk = s => new CacheKey(new KeyPrefix("8754", "9765"), s.Id.ToString());
+            IEnumerable<Serialized> result = await this._cache.GetRegionAsync(new KeyPrefix("123", "456"), funk);
+            Assert.Empty(result);
+        }
+
+        [Fact]
         public async Task PutGetStringRegion()
         {
             KeyPrefix prefix = new KeyPrefix(Key.Null, _keyString);

@@ -30,12 +30,12 @@ namespace StackCache.Core.CacheKeys
         }
 
         // this constructor is used for deserialization
-        public CacheKey(SerializationInfo info, StreamingContext text)
-            : this()
-        {
-            this._prefix = (KeyPrefix) info.GetValue(nameof(this.Prefix), typeof (KeyPrefix));
-            this._suffix = (Key) info.GetValue(nameof(this.Suffix), typeof (Key));
-        }
+        //public CacheKey(SerializationInfo info, StreamingContext text)
+        //    : this()
+        //{
+        //    this._prefix = (KeyPrefix) info.GetValue(nameof(this.Prefix), typeof (KeyPrefix));
+        //    this._suffix = (Key) info.GetValue(nameof(this.Suffix), typeof (Key));
+        //}
 
         private static readonly CacheKey _null = new CacheKey(Key.Null, Key.Null, Key.Null);
 

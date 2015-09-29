@@ -62,19 +62,21 @@ namespace StackCache.Core
             this.MemoryCache?.Put(key, value);
             this.DistributedCache?.Put(key, value);
             this._messenger?.Notify(this._genericChannel,
-                new DataNotification(this._identifier, NotificationType.UpdatedItem, new[] {key}));
+                new DataNotification(this._identifier, NotificationType.UpdatedItem, new[] { key }));
         }
 
         public void Remove(CacheKey key)
         {
             this.MemoryCache?.Remove(key);
             this.DistributedCache?.Remove(key);
+            this._messenger?.Notify(this._genericChannel, new DataNotification(this._identifier, NotificationType.RemovedItem, key));
         }
 
         public void RemoveRegion(KeyPrefix prefix)
         {
             this.MemoryCache?.RemoveRegion(prefix);
             this.DistributedCache?.RemoveRegion(prefix);
+            this._messenger?.Notify(this._genericChannel, new DataNotification(this._identifier, NotificationType.RemovedRegion, new CacheKey(prefix, Key.Null)));
         }
 
         public async Task<IDisposable> Lock(string key, TimeSpan timeout, CancellationToken cancellationToken)
@@ -102,8 +104,8 @@ namespace StackCache.Core
                 return values;
             if (this.DistributedCache != null)
                 values = this.DistributedCache.GetRegion<T>(prefix);
-            if (values == null)
-                return null;
+            if (values == null || !values.Any())
+                return Enumerable.Empty<T>();
             KeyValuePair<CacheKey, T>[] dic =
                 values.Select(i => new KeyValuePair<CacheKey, T>(keyFromValue(i), i)).ToArray();
             this.MemoryCache.PutRegion(dic);
@@ -112,13 +114,14 @@ namespace StackCache.Core
 
         public async Task<IEnumerable<T>> GetRegionAsync<T>(KeyPrefix prefix, Func<T, CacheKey> keyFromValue)
         {
+            if (keyFromValue == null) throw new ArgumentNullException(nameof(keyFromValue));
             IEnumerable<T> values = await this.MemoryCache.GetRegionAsync<T>(prefix);
             if (values != null && values.Any())
                 return values;
             if (this.DistributedCache != null)
                 values = await this.DistributedCache.GetRegionAsync<T>(prefix);
-            if (values == null)
-                return null;
+            if (values == null || !values.Any())
+                return Enumerable.Empty<T>();
             KeyValuePair<CacheKey, T>[] dic =
                 values.Select(i => new KeyValuePair<CacheKey, T>(keyFromValue(i), i)).ToArray();
             this.MemoryCache.PutRegion(dic);
@@ -132,8 +135,8 @@ namespace StackCache.Core
                 return values;
             if (this.DistributedCache != null)
                 values = await this.DistributedCache.GetRegionKeyValuesAsync<T>(prefix);
-            if (values == null)
-                return null;
+            if (values == null || !values.Any())
+                return Enumerable.Empty<KeyValuePair<CacheKey, T>>();
             this.MemoryCache.PutRegion(values.ToArray());
             return values;
         }
@@ -153,8 +156,7 @@ namespace StackCache.Core
             value = cacheValueCreator(key);
             this.MemoryCache.Put(key, value);
             this.DistributedCache?.Put(key, value);
-            this._messenger?.Notify(this._genericChannel,
-                new DataNotification(this._identifier, NotificationType.UpdatedItem, new[] {key}));
+            this._messenger?.Notify(this._genericChannel, new DataNotification(this._identifier, NotificationType.UpdatedItem, new[] { key }));
             return value;
         }
 
@@ -162,9 +164,7 @@ namespace StackCache.Core
         {
             this.MemoryCache.PutRegion(values);
             this.DistributedCache?.PutRegion(values);
-            this._messenger?.Notify(this._genericChannel,
-                new DataNotification(this._identifier, NotificationType.UpdatedRegion,
-                    values.Select(i => i.Key).ToArray()));
+            this._messenger?.Notify(this._genericChannel, new DataNotification(this._identifier, NotificationType.UpdatedRegion, values.Select(i => i.Key).ToArray()));
         }
 
         private void OnNotification(string channel, DataNotification dn)
@@ -187,8 +187,6 @@ namespace StackCache.Core
                     foreach (CacheKey key in dn.Keys)
                         this.MemoryCache.Remove(key);
                     break;
-                default:
-                    throw new ArgumentOutOfRangeException();
             }
         }
     }

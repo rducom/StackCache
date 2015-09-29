@@ -39,6 +39,36 @@
         }
 
         [Fact]
+        public void KeyTranstypeByte()
+        {
+            var tmp = new byte[] { 42, 42, 42, 44 };
+            Key k1 = tmp;
+            Key k2 = k1;
+            Assert.True(((byte[])k1).SequenceEqual((byte[])k2));
+        }
+
+        [Fact]
+        public void KeyIsNullOrEmpty()
+        {
+            Key k1 = new Key();
+            Assert.True(k1.IsNullOrEmpty);
+
+            Key k2 = String.Empty;
+            Assert.True(k1.IsNullOrEmpty);
+
+            Key k3 = (byte[])null;
+            Assert.True(k1.IsNullOrEmpty);
+        }
+
+        [Fact]
+        public void KeyIsNotEquals()
+        {
+            Key k1 = "a";
+            Key k2 = "b";
+            Assert.True(k1 != k2);
+        }
+
+        [Fact]
         public void KeyPrefixTranstypeString()
         {
             KeyPrefix p1 = new KeyPrefix("test", Key.Null);

@@ -16,12 +16,12 @@ namespace StackCache.Core.CacheKeys
             this._region = region;
         }
 
-        public KeyPrefix(SerializationInfo info, StreamingContext text)
-            : this()
-        {
-            this._tenant = (Key)info.GetValue(nameof(this.Tenant), typeof(Key));
-            this._region = (Key)info.GetValue(nameof(this.Region), typeof(Key));
-        }
+        //public KeyPrefix(SerializationInfo info, StreamingContext text)
+        //    : this()
+        //{
+        //    this._tenant = (Key)info.GetValue(nameof(this.Tenant), typeof(Key));
+        //    this._region = (Key)info.GetValue(nameof(this.Region), typeof(Key));
+        //}
 
         public Key Tenant => this._tenant;
         public Key Region => this._region;

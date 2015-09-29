@@ -19,11 +19,11 @@ namespace StackCache.Core.CacheKeys
             this._key = keyData;
         }
 
-        public Key(SerializationInfo info, StreamingContext text)
-            : this()
-        {
-            this._key = (byte[])info.GetValue(nameof(this._key), typeof(Key));
-        }
+        //public Key(SerializationInfo info, StreamingContext text)
+        //    : this()
+        //{
+        //    this._key = (byte[])info.GetValue(nameof(this._key), typeof(Key));
+        //}
 
         public bool IsNullOrEmpty => this._key == null || this._key.Length == 0;
 

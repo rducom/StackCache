@@ -12,7 +12,7 @@ namespace StackCache.Core.Messaging
         {
         }
 
-        public DataNotification(string source, NotificationType notificationType, CacheKey[] keys)
+        public DataNotification(string source, NotificationType notificationType, params CacheKey[] keys)
         {
             this.Source = source;
             this.NotificationType = notificationType;
