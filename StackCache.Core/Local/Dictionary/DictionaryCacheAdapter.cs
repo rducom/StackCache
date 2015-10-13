@@ -9,9 +9,10 @@ namespace StackCache.Core.Local.Dictionary
     using CacheValues;
     using Locking;
 
-    public class DictionaryCacheAdapter : ICacheAdapter
+    public class DictionaryCacheAdapter : ILocalCacheAdapter
     {
         private readonly ConcurrentDictionary<KeyPrefix, ConcurrentDictionary<Key, ICacheValue>> _dic = new ConcurrentDictionary<KeyPrefix, ConcurrentDictionary<Key, ICacheValue>>();
+        private readonly IMutex _mutex = new IndexedMutex();
 
         private ConcurrentDictionary<Key, ICacheValue> Sub(KeyPrefix prefix)
         {
@@ -74,16 +75,17 @@ namespace StackCache.Core.Local.Dictionary
                 .ToList();
             return Task.FromResult(result.AsEnumerable());
         }
+
+        public IMutex Mutex
+        {
+            get { return this._mutex; }
+        }
+
         public void RemoveRegion(KeyPrefix prefix)
         {
             ConcurrentDictionary<Key, ICacheValue> toremove;
             this._dic.TryRemove(prefix, out toremove);
-        }
-
-        public ILock GetLocker()
-        {
-            return new LocalLock();
-        }
+        } 
 
         public void PutRegion<T>(KeyValuePair<CacheKey, T>[] values)
         {

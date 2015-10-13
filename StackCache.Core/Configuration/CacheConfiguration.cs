@@ -37,7 +37,7 @@
                     throw new ArgumentOutOfRangeException();
             }
 
-            ICacheAdapter firstLevelCache = null;
+            ILocalCacheAdapter firstLevelCache = null;
 
             switch (this._firstLevelCacheType)
             {
@@ -52,7 +52,7 @@
             }
 
 
-            ICacheAdapter secondLevelCache = null;
+            IDistributedCacheAdapter secondLevelCache = null;
             IMessenger messenger = null;
             switch (this._secondLevelCacheType)
             {

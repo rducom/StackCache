@@ -10,7 +10,6 @@ namespace StackCache.Core.Stores
     using Helpers;
     using Locking;
 
-
     /// <summary>
     /// Provide a global storage for a given Type.
     /// A Storage is associated to a StackCache Region and should contains all instances of a given type
@@ -36,7 +35,7 @@ namespace StackCache.Core.Stores
             this._cache = cache;
             this._source = source;
             this._elector = elector;
-            this._loaderAsyncLazy = new AsyncLazy<bool>((Func<Task<bool>>)this.EnsureStoreReady);
+            this._loaderAsyncLazy = new AsyncLazy<bool>(this.EnsureStoreReady);
         }
 
         protected override Type StoreType => typeof(T);
@@ -45,26 +44,26 @@ namespace StackCache.Core.Stores
 
         public async Task<T> Get(TKey key)
         {
-            await this.EnsureStoreReady();
+            await this.EnsureReady();
             return this._cache.Get<T>(this.Prefix + this.ToKey(key));
         }
 
         public async Task<IEnumerable<T>> Get(params TKey[] keys)
         {
-            await this.EnsureStoreReady();
+            await this.EnsureReady();
             return
                 keys.Select(k => this._cache.Get<T>(this.Prefix + this.ToKey(k))).Where(t => t != null);
         }
 
         public async Task<IEnumerable<T>> GetAll()
         {
-            await this.EnsureStoreReady();
+            await this.EnsureReady();
             return this._cache.GetRegion<T>(this.Prefix, i => this.Prefix + this.ToKey(i));
         }
 
         public async Task Save(IEnumerable<Crud<T>> value)
         {
-            await this.EnsureStoreReady();
+            await this.EnsureReady();
             IEnumerable<Crud<T>> enumerable = value as IList<Crud<T>> ?? value.ToList();
             IDatabaseSourceGlobal<T, TKey> source = this._source();
             await source.Save(enumerable);
@@ -89,6 +88,11 @@ namespace StackCache.Core.Stores
 
         protected abstract Key ToKey(T value);
 
+        private async Task EnsureReady()
+        {
+            await this._loaderAsyncLazy;
+        }
+
         private async Task<bool> EnsureStoreReady()
         {
             bool isLeader = await this.EnsureInitialized();
@@ -99,7 +103,6 @@ namespace StackCache.Core.Stores
                 // if no, then be the leader ?
                 // if yes, then await for the next RegionChange notification, and return only when data is in L1
             }
-
             return true;
         }
 
@@ -108,19 +111,17 @@ namespace StackCache.Core.Stores
             if (this._isLoaded)
                 return false;
 
-            return await this._elector.ExecuteIfLeader(ApplicationNode.Identifier, this.StoreIdentifier, async () =>
-             {
-                 IDatabaseSourceGlobal<T, TKey> sourceInstance = this._source();
-                 // If we are leader, then we try to load data from source
-                 IEnumerable<T> values = await sourceInstance.Load();
-
-                 KeyValuePair<CacheKey, T>[] keyValues =
-                     values.Select(i => new KeyValuePair<CacheKey, T>(this.Prefix + this.ToKey(i), i)).ToArray();
-
-                 this._cache.PutRegion(keyValues);
-                 this._isLoaded = true;
-                 return true;
-             });
+            return await this._elector.ExecuteIfLeader(ApplicationNode.Identifier, this.StoreIdentifier, async (token) =>
+            {
+                IDatabaseSourceGlobal<T, TKey> sourceInstance = this._source();
+                // If we are leader, then we try to load data from source
+                IEnumerable<T> values = await sourceInstance.Load();
+                KeyValuePair<CacheKey, T>[] keyValues =
+                    values.Select(i => new KeyValuePair<CacheKey, T>(this.Prefix + this.ToKey(i), i)).ToArray();
+                this._cache.PutRegion(keyValues);
+                this._isLoaded = true;
+                return true;
+            });
         }
     }
 }

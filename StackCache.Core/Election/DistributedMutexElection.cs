@@ -11,9 +11,9 @@ namespace StackCache.Core.Election
     /// </summary>
     public class DistributedMutexElection : IElection
     {
-        private readonly ICacheAdapter _distributedCache;
+        private readonly IDistributedCacheAdapter _distributedCache;
 
-        public DistributedMutexElection(ICacheAdapter distributedCache)
+        public DistributedMutexElection(IDistributedCacheAdapter distributedCache)
         {
             if (distributedCache == null) throw new ArgumentNullException(nameof(distributedCache));
             if (distributedCache.CacheType != CacheType.Distributed)
@@ -21,17 +21,9 @@ namespace StackCache.Core.Election
             this._distributedCache = distributedCache;
         }
 
-        public async Task<T> ExecuteIfLeader<T>(string identity, string context, Func<Task<T>> leaderAction)
+        public async Task<T> ExecuteIfLeader<T>(string identity, string context, Func<CancellationToken, Task<T>> leaderAction)
         {
-            ILock locker = this._distributedCache.GetLocker();
-            using (
-                ILockState state =
-                    await locker.Lock(identity + context, TimeSpan.FromMinutes(1), CancellationToken.None))
-            {
-                if (state.IsLockAcquired)
-                    return await leaderAction();
-            }
-            return default(T);
+            return await this._distributedCache.Mutex.TryTakeMutexAndExecuteTask<T>(identity + context, leaderAction, TimeSpan.FromMinutes(1), CancellationToken.None);
         }
     }
 }

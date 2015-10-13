@@ -1,6 +1,7 @@
 ﻿namespace StackCache.Core.Election
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -15,6 +16,6 @@
         /// <param name="context">Store identity. If null or empty, then leadership is asked for all stores</param>
         /// <param name="leaderAction">Action execute by the leader</param>
         /// <returns>True is current identity/[context] is elected as leader</returns>
-        Task<T> ExecuteIfLeader<T>(string identity, string context, Func<Task<T>> leaderAction);
+        Task<T> ExecuteIfLeader<T>(string identity, string context, Func<CancellationToken, Task<T>> leaderAction);
     }
 }

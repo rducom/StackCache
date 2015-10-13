@@ -3,49 +3,35 @@ namespace StackCache.Core.Locking
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using CacheKeys;
     using StackExchange.Redis;
 
-    public class RedisLocker : ILock
+    public class RedisMutex : IMutexAsync
     {
         private readonly IDatabase _database;
-        private readonly int _milliseconds;
-        public RedisLocker(IDatabase database, int retryMilliseconds = 100)
+
+        public RedisMutex(IDatabase database)
         {
             this._database = database;
-            this._milliseconds = retryMilliseconds;
         }
 
-        public async Task<ILockState> Lock(string key, TimeSpan timeout, CancellationToken cancellationToken)
+        public async Task<T> TryTakeMutexAndExecuteTask<T>(CacheKey key, Func<CancellationToken, Task<T>> task, TimeSpan timeout, CancellationToken cancellationToken)
         {
-            await Task.Yield();
+            if (task == null) throw new ArgumentNullException(nameof(task));
             RedisKey redisKey = key;
             RedisValue token = Environment.MachineName + Guid.NewGuid();
-            if (this._database.LockTake(redisKey, token, timeout))
-                return new RedisLockDispose(this._database, redisKey, token);
-            else
-                return new NotLockedState();
-        }
-
-        class RedisLockDispose : ILockState
-        {
-            private readonly IDatabase _database;
-            private readonly RedisKey _key;
-            private readonly RedisValue _value;
-
-            public RedisLockDispose(IDatabase database, RedisKey key, RedisValue value)
+            if (!this._database.LockTake(redisKey, token, timeout))
+                return default(T);
+            T result;
+            try
             {
-                if (database == null) throw new ArgumentNullException(nameof(database));
-                this._database = database;
-                this._key = key;
-                this._value = value;
+                result = await task(cancellationToken);
             }
-
-            public void Dispose()
+            finally
             {
-                this._database.LockRelease(this._key, this._value);
+                this._database.LockRelease(redisKey, token);
             }
-
-            public bool IsLockAcquired => true;
+            return result;
         }
     }
 }

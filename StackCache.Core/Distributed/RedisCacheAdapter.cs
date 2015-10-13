@@ -14,7 +14,7 @@ namespace StackCache.Core.Distributed
     /// <summary>
     /// Redis cache wrapper around StackExchange.Redis
     /// </summary>
-    public class RedisCacheAdapter : ICacheAdapter, IMessenger
+    public class RedisCacheAdapter : IDistributedCacheAdapter, IMessenger
     {
         public RedisCacheAdapter(IEnumerable<RedisServer> redisInstances, int databaseNumber, ISerializer serializer)
         {
@@ -28,6 +28,7 @@ namespace StackCache.Core.Distributed
             this._server = redis.GetServer(master.Hostname, master.Port);
             this._subscriber = redis.GetSubscriber();
             this._db = redis.GetDatabase(databaseNumber);
+            this.Mutex = new RedisMutex(this._db);
         }
 
         private readonly int _databaseNumber;
@@ -94,8 +95,9 @@ namespace StackCache.Core.Distributed
                  }));
 
             return result;
-        } 
-          
+        }
+
+
         public void Invalidate(params CacheKey[] key)
         {
             throw new NotImplementedException();
@@ -124,11 +126,8 @@ namespace StackCache.Core.Distributed
             this._db.KeyDelete(keys.ToArray());
         }
 
-        public ILock GetLocker()
-        {
-            return new RedisLocker(this._db);
-        }
-
+        public IMutexAsync Mutex { get; }
+         
         public void PutRegion<T>(KeyValuePair<CacheKey, T>[] values)
         {
             KeyValuePair<RedisKey, RedisValue>[] toinsert = values

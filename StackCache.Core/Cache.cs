@@ -19,10 +19,10 @@ namespace StackCache.Core
         private readonly string _identifier = Guid.NewGuid().ToString();
         private readonly IMessenger _messenger;
 
-        public Cache(ICacheAdapter memoryCache, ICacheAdapter distributedCache, IMessenger messenger)
+        public Cache(ILocalCacheAdapter memoryCache, IDistributedCacheAdapter distributedCache, IMessenger messenger)
         {
             this.DistributedCache = distributedCache;
-            this.MemoryCache = memoryCache ?? new DictionaryCacheAdapter();
+            this.LocalCache = memoryCache ?? new DictionaryCacheAdapter();
             this._messenger = messenger;
             this._messenger?.Subscribe<DataNotification>(this._genericChannel, this.OnNotification);
         }
@@ -42,24 +42,24 @@ namespace StackCache.Core
             }
         }
 
-        public ICacheAdapter DistributedCache { get; }
+        public IDistributedCacheAdapter DistributedCache { get; }
 
-        public ICacheAdapter MemoryCache { get; }
+        public ILocalCacheAdapter LocalCache { get; }
 
         public T Get<T>(CacheKey key)
         {
             T value;
-            if (this.MemoryCache.Get(key, out value))
+            if (this.LocalCache.Get(key, out value))
                 return value;
             if (this.DistributedCache == null || !this.DistributedCache.Get(key, out value))
                 return default(T);
-            this.MemoryCache.Put(key, value);
+            this.LocalCache.Put(key, value);
             return value;
         }
 
         public void Put<T>(CacheKey key, T value)
         {
-            this.MemoryCache?.Put(key, value);
+            this.LocalCache?.Put(key, value);
             this.DistributedCache?.Put(key, value);
             this._messenger?.Notify(this._genericChannel,
                 new DataNotification(this._identifier, NotificationType.UpdatedItem, new[] { key }));
@@ -67,39 +67,25 @@ namespace StackCache.Core
 
         public void Remove(CacheKey key)
         {
-            this.MemoryCache?.Remove(key);
+            this.LocalCache?.Remove(key);
             this.DistributedCache?.Remove(key);
             this._messenger?.Notify(this._genericChannel, new DataNotification(this._identifier, NotificationType.RemovedItem, key));
         }
 
         public void RemoveRegion(KeyPrefix prefix)
         {
-            this.MemoryCache?.RemoveRegion(prefix);
+            this.LocalCache?.RemoveRegion(prefix);
             this.DistributedCache?.RemoveRegion(prefix);
             this._messenger?.Notify(this._genericChannel, new DataNotification(this._identifier, NotificationType.RemovedRegion, new CacheKey(prefix, Key.Null)));
         }
-
-        public async Task<IDisposable> Lock(string key, TimeSpan timeout, CancellationToken cancellationToken)
-        {
-            ILock local = this.MemoryCache.GetLocker();
-            IDisposable localDispose = await local.Lock(key, timeout, cancellationToken);
-
-            if (this.DistributedCache == null)
-                return localDispose;
-
-            ILock distributed = this.DistributedCache.GetLocker();
-            IDisposable remoteDispose = await distributed.Lock(key, timeout, cancellationToken);
-
-            return new WrapDisposable(localDispose, remoteDispose);
-        }
-
+         
         public Key Tenant { get; }
 
         public IEnumerable<T> GetRegion<T>(KeyPrefix prefix, Func<T, CacheKey> keyFromValue)
         {
             if (keyFromValue == null) throw new ArgumentNullException(nameof(keyFromValue));
 
-            IEnumerable<T> values = this.MemoryCache.GetRegion<T>(prefix);
+            IEnumerable<T> values = this.LocalCache.GetRegion<T>(prefix);
             if (values != null && values.Any())
                 return values;
             if (this.DistributedCache != null)
@@ -108,14 +94,14 @@ namespace StackCache.Core
                 return Enumerable.Empty<T>();
             KeyValuePair<CacheKey, T>[] dic =
                 values.Select(i => new KeyValuePair<CacheKey, T>(keyFromValue(i), i)).ToArray();
-            this.MemoryCache.PutRegion(dic);
+            this.LocalCache.PutRegion(dic);
             return values;
         }
 
         public async Task<IEnumerable<T>> GetRegionAsync<T>(KeyPrefix prefix, Func<T, CacheKey> keyFromValue)
         {
             if (keyFromValue == null) throw new ArgumentNullException(nameof(keyFromValue));
-            IEnumerable<T> values = await this.MemoryCache.GetRegionAsync<T>(prefix);
+            IEnumerable<T> values = await this.LocalCache.GetRegionAsync<T>(prefix);
             if (values != null && values.Any())
                 return values;
             if (this.DistributedCache != null)
@@ -124,37 +110,37 @@ namespace StackCache.Core
                 return Enumerable.Empty<T>();
             KeyValuePair<CacheKey, T>[] dic =
                 values.Select(i => new KeyValuePair<CacheKey, T>(keyFromValue(i), i)).ToArray();
-            this.MemoryCache.PutRegion(dic);
+            this.LocalCache.PutRegion(dic);
             return values;
         }
 
         public async Task<IEnumerable<KeyValuePair<CacheKey, T>>> GetRegionKeyValuesAsync<T>(KeyPrefix prefix)
         {
-            IEnumerable<KeyValuePair<CacheKey, T>> values = await this.MemoryCache.GetRegionKeyValuesAsync<T>(prefix);
+            IEnumerable<KeyValuePair<CacheKey, T>> values = await this.LocalCache.GetRegionKeyValuesAsync<T>(prefix);
             if (values != null && values.Any())
                 return values;
             if (this.DistributedCache != null)
                 values = await this.DistributedCache.GetRegionKeyValuesAsync<T>(prefix);
             if (values == null || !values.Any())
                 return Enumerable.Empty<KeyValuePair<CacheKey, T>>();
-            this.MemoryCache.PutRegion(values.ToArray());
+            this.LocalCache.PutRegion(values.ToArray());
             return values;
         }
 
         public T GetOrCreate<T>(CacheKey key, Func<CacheKey, T> cacheValueCreator)
         {
             T value;
-            if (this.MemoryCache.Get(key, out value))
+            if (this.LocalCache.Get(key, out value))
             {
                 return value;
             }
             if (this.DistributedCache != null && this.DistributedCache.Get(key, out value))
             {
-                this.MemoryCache.Put(key, value);
+                this.LocalCache.Put(key, value);
                 return value;
             }
             value = cacheValueCreator(key);
-            this.MemoryCache.Put(key, value);
+            this.LocalCache.Put(key, value);
             this.DistributedCache?.Put(key, value);
             this._messenger?.Notify(this._genericChannel, new DataNotification(this._identifier, NotificationType.UpdatedItem, new[] { key }));
             return value;
@@ -162,7 +148,7 @@ namespace StackCache.Core
 
         public void PutRegion<T>(KeyValuePair<CacheKey, T>[] values)
         {
-            this.MemoryCache.PutRegion(values);
+            this.LocalCache.PutRegion(values);
             this.DistributedCache?.PutRegion(values);
             this._messenger?.Notify(this._genericChannel, new DataNotification(this._identifier, NotificationType.UpdatedRegion, values.Select(i => i.Key).ToArray()));
         }
@@ -174,18 +160,18 @@ namespace StackCache.Core
             switch (dn.NotificationType)
             {
                 case NotificationType.UpdatedItem:
-                    this.MemoryCache.Invalidate(dn.Keys);
+                    this.LocalCache.Invalidate(dn.Keys);
                     break;
                 case NotificationType.UpdatedRegion:
-                    this.MemoryCache.Invalidate(dn.Keys);
+                    this.LocalCache.Invalidate(dn.Keys);
                     break;
                 case NotificationType.RemovedItem:
                     foreach (CacheKey key in dn.Keys)
-                        this.MemoryCache.Remove(key);
+                        this.LocalCache.Remove(key);
                     break;
                 case NotificationType.RemovedRegion:
                     foreach (CacheKey key in dn.Keys)
-                        this.MemoryCache.Remove(key);
+                        this.LocalCache.Remove(key);
                     break;
             }
         }

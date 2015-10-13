@@ -32,14 +32,7 @@ namespace StackCache.Core
         /// <param name="key">The key</param>
         /// <param name="value">The value</param>
         void Put<T>(CacheKey key, T value);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key"></param>
-        /// <param name="cacheValueCreator"></param>
-        /// <returns></returns>
+         
         T GetOrCreate<T>(CacheKey key, Func<CacheKey, T> cacheValueCreator);
 
         void Remove(CacheKey key);
@@ -49,13 +42,21 @@ namespace StackCache.Core
         void PutRegion<T>(KeyValuePair<CacheKey, T>[] values);
 
         void RemoveRegion(KeyPrefix prefix);
-        
+
         Task<IEnumerable<T>> GetRegionAsync<T>(KeyPrefix prefix);
 
         Task<IEnumerable<KeyValuePair<CacheKey, T>>> GetRegionKeyValuesAsync<T>(KeyPrefix prefix);
 
-        ILock GetLocker();
-
         void Invalidate(params CacheKey[] key);
+    }
+
+    public interface ILocalCacheAdapter : ICacheAdapter
+    {
+        IMutex Mutex { get; }
+    }
+
+    public interface IDistributedCacheAdapter : ICacheAdapter
+    {
+        IMutexAsync Mutex { get; }
     }
 }

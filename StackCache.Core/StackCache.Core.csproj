@@ -66,9 +66,8 @@
     <Compile Include="Election\IElection.cs" />
     <Compile Include="Election\ConfiguredElection.cs" />
     <Compile Include="Helpers\ApplicationNode.cs" />
-    <Compile Include="Helpers\WrapDisposable.cs" />
     <Compile Include="Locking\AsyncLazy.cs" />
-    <Compile Include="Locking\ILockState.cs" />
+    <Compile Include="Locking\IMutexState.cs" />
     <Compile Include="Locking\LocalLock.cs" />
     <Compile Include="Locking\NotLockedState.cs" />
     <Compile Include="Messaging\DataNotification.cs" />

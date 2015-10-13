@@ -1,6 +1,7 @@
 ﻿namespace StackCache.Core.Election
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -22,10 +23,10 @@
                 await leaderAction();
         }
 
-        public async Task<T> ExecuteIfLeader<T>(string identity, string context, Func<Task<T>> leaderAction)
+        public async Task<T> ExecuteIfLeader<T>(string identity, string context, Func<CancellationToken, Task<T>> leaderAction)
         {
             if (this._isLeader)
-                return await leaderAction();
+                return await leaderAction(CancellationToken.None);
             return default(T);
         }
     }

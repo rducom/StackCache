@@ -9,7 +9,7 @@ namespace StackCache.Core
     public interface ICache
     {
         T Get<T>(CacheKey key);
-        
+
         void Put<T>(CacheKey key, T value);
 
         void Remove(CacheKey key);
@@ -25,9 +25,7 @@ namespace StackCache.Core
         void RemoveRegion(KeyPrefix prefix);
 
         T GetOrCreate<T>(CacheKey key, Func<CacheKey, T> cacheValueCreator);
-            
-        Task<IDisposable> Lock(string key, TimeSpan timeout, CancellationToken cancellationToken);
-
+        
         Key Tenant { get; }
 
     }
