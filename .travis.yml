@@ -1,0 +1,12 @@
+language: csharp
+solution: StackCache.sln
+
+services:
+  - redis-server
+
+install:
+  - nuget restore StackCache.sln
+  
+script:
+  - xbuild /p:Configuration=Debug C-Sharp-Promise.sln
+  - mono ./packages/xunit.runner.console.*/tools/xunit.console.exe ./StackCache.Test/bin/Debug/StackCache.Test.dll
