@@ -27,7 +27,6 @@ namespace StackCache.Core
         T GetOrCreate<T>(CacheKey key, Func<CacheKey, T> cacheValueCreator);
         
         Key Tenant { get; }
-
     }
 }
 

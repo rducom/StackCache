@@ -32,6 +32,14 @@
         }
 
         [Fact]
+        public void KeyExpiresIn()
+        {
+            CacheKey cc = new CacheKey("test");
+            cc.ExpiresAt(DateTime.UtcNow);
+
+        }
+
+        [Fact]
         public void KeyTranstypeString()
         {
             Key k1 = "test";
@@ -53,7 +61,7 @@
             Key k1 = new Key();
             Assert.True(k1.IsNullOrEmpty);
 
-            Key k2 = String.Empty;
+            Key k2 = string.Empty;
             Assert.True(k1.IsNullOrEmpty);
 
             Key k3 = (byte[])null;

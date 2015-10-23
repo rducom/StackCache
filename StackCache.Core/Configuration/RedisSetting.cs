@@ -5,7 +5,7 @@ namespace StackCache.Core.Configuration
 
     public class RedisSetting : Setting
     {
-        public String ServerName
+        public string ServerName
         {
             get; set;
         }

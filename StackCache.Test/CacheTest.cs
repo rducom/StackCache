@@ -79,7 +79,7 @@ namespace StackCache.Test
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                this._cache.GetRegion<String>(new KeyPrefix("123", "456"), null);
+                this._cache.GetRegion<string>(new KeyPrefix("123", "456"), null);
             });
         }
 
@@ -97,7 +97,7 @@ namespace StackCache.Test
         {
             await Assert.ThrowsAsync<ArgumentNullException>(async () =>
             {
-                await this._cache.GetRegionAsync<String>(new KeyPrefix("123", "456"), null);
+                await this._cache.GetRegionAsync<string>(new KeyPrefix("123", "456"), null);
             });
         }
 

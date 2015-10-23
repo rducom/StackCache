@@ -13,6 +13,14 @@ namespace StackCache.Core.CacheKeys
     [ProtoContract]
     public struct CacheKey
     {
+        public CacheKey(Key suffix)
+          : this()
+        {
+            this._prefix = KeyPrefix.Null;
+            this._suffix = suffix;
+            this.ExpirationMode = ExpirationMode.None;
+        }
+
         public CacheKey(KeyPrefix prefix, Key suffix)
             : this()
         {
@@ -29,19 +37,13 @@ namespace StackCache.Core.CacheKeys
             this.ExpirationMode = ExpirationMode.None;
         }
 
-        // this constructor is used for deserialization
-        //public CacheKey(SerializationInfo info, StreamingContext text)
-        //    : this()
-        //{
-        //    this._prefix = (KeyPrefix) info.GetValue(nameof(this.Prefix), typeof (KeyPrefix));
-        //    this._suffix = (Key) info.GetValue(nameof(this.Suffix), typeof (Key));
-        //}
-
         private static readonly CacheKey _null = new CacheKey(Key.Null, Key.Null, Key.Null);
 
-        [ProtoMember(1)] private readonly KeyPrefix _prefix;
+        [ProtoMember(1)]
+        private readonly KeyPrefix _prefix;
 
-        [ProtoMember(2)] private readonly Key _suffix;
+        [ProtoMember(2)]
+        private readonly Key _suffix;
 
         /// <summary>
         /// CacheKey Prefix identifies Tenant + Region
@@ -54,8 +56,28 @@ namespace StackCache.Core.CacheKeys
         public Key Suffix => this._suffix;
 
         public ExpirationMode ExpirationMode { get; private set; }
+
         public DateTime? ExpirationDateTime { get; private set; }
+
         public TimeSpan? ExpirationTimeSpan { get; private set; }
+
+        public bool IsExpired
+        {
+            get
+            {
+                switch (this.ExpirationMode)
+                {
+                    case ExpirationMode.None:
+                        return false;
+                    case ExpirationMode.Sliding:
+                        return this.ExpirationDateTime.HasValue && DateTime.UtcNow.Subtract(this.ExpirationDateTime.Value) > this.ExpirationTimeSpan;
+                    case ExpirationMode.AbsoluteUtc:
+                        return this.ExpirationDateTime.HasValue && this.ExpirationDateTime.Value > DateTime.UtcNow;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
 
         private bool Equals(CacheKey other)
         {
@@ -65,7 +87,7 @@ namespace StackCache.Core.CacheKeys
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
-            return obj is CacheKey && this.Equals((CacheKey) obj);
+            return obj is CacheKey && this.Equals((CacheKey)obj);
         }
 
         public override int GetHashCode()
@@ -73,22 +95,23 @@ namespace StackCache.Core.CacheKeys
             unchecked
             {
                 int hash = 17;
-                hash = hash*29 + this.Prefix.GetHashCode();
-                hash = hash*29 + this.Suffix.GetHashCode();
+                hash = hash * 29 + this.Prefix.GetHashCode();
+                hash = hash * 29 + this.Suffix.GetHashCode();
                 return hash;
             }
         }
 
-        public void SetExpiration(TimeSpan timeSpan)
+        public void ExpiresIn(TimeSpan timeSpan)
         {
+            this.ExpirationDateTime = DateTime.UtcNow;
             this.ExpirationTimeSpan = timeSpan;
             this.ExpirationMode = ExpirationMode.Sliding;
         }
 
-        public void SetExpiration(DateTime dateTime)
+        public void ExpiresAt(DateTime dateTime)
         {
             this.ExpirationDateTime = dateTime;
-            this.ExpirationMode = ExpirationMode.Sliding;
+            this.ExpirationMode = ExpirationMode.AbsoluteUtc;
         }
 
         /// <summary>
@@ -114,15 +137,15 @@ namespace StackCache.Core.CacheKeys
 
         public static implicit operator RedisKey(CacheKey key)
         {
-            return (string) key;
+            return (string)key;
         }
 
         public static implicit operator CacheKey(RedisKey key)
         {
-            return (string) key;
+            return (string)key;
         }
 
-        public static implicit operator string(CacheKey key)
+        public static implicit operator string (CacheKey key)
         {
             return key.ToString();
         }
