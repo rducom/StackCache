@@ -7,8 +7,11 @@ environment:
     secure: KLNGp9gov7beUPgXlPl9JQ==
   SonarPassword:
     secure: 02lHHiYYhDhj8muA+ph2HkLfsBsS9uMCIxEDhE42hiw=
+  TestData:
+	secure: wwJs9DKjkgsQsYOfbV6ALD3hMurRzmUDkMk2bbPuo0Q=
 
 install:
+- cmd echo %TestData%
 - nuget restore
 - cmd: nuget install redis-64 -excludeversion
 - cmd: redis-64\redis-server.exe --service-install 
