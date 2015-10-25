@@ -1,20 +1,32 @@
+environment:
+  COVERALLS_REPO_TOKEN:
+    secure: kwZmZVMlkMBfoLy7tJOcm4emlFLrdRkvoIKbGSKXTDQ/21dbDg30yrSG5/dvtEJ0
+  SonarServer:
+    secure: YZ5qSxTneyZ6VRI63hpneF7sAJyohVpSktCtV1kFwtOYsMJbsunNKqOOOx+br9Y2
+  SonarUser:
+    secure: KLNGp9gov7beUPgXlPl9JQ==
+  SonarPassword:
+    secure: 02lHHiYYhDhj8muA+ph2HkLfsBsS9uMCIxEDhE42hiw=
+
 install:
 - nuget restore
 - cmd: nuget install redis-64 -excludeversion
 - cmd: redis-64\redis-server.exe --service-install 
 - cmd: redis-64\redis-server.exe --service-start
+- cmd: DownloadFile https://github.com/SonarSource/sonar-msbuild-runner/releases/download/1.0.1/MSBuild.SonarQube.Runner-1.0.1.zip
+- cmd: 7z.exe e MSBuild.SonarQube.Runner-1.0.1.zip
 
 configuration: Debug
 
 before_build:
 - nuget restore
+- cmd: SonarRunner.cmd
+
+after_build:
+- cmd: MSBuild.SonarQube.Runner.exe end
 
 build:
   project: StackCache.sln
-  
-environment:
-  COVERALLS_REPO_TOKEN:
-    secure: kwZmZVMlkMBfoLy7tJOcm4emlFLrdRkvoIKbGSKXTDQ/21dbDg30yrSG5/dvtEJ0
 
 after_test:
 - packages\OpenCover.4.6.210-rc\tools\OpenCover.Console.exe -register:user -target:"packages\xunit.runner.console.2.0.0\tools\xunit.console.exe" -targetargs:"StackCache.Test\bin\Debug\StackCache.Test.dll -noshadow" -filter:"+[StackCache*]* -[StackCache.Test]*" -output:opencovertests.xml -coverbytest:*.Test.dll
