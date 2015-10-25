@@ -8,7 +8,7 @@ environment:
   SonarPassword:
     secure: 02lHHiYYhDhj8muA+ph2HkLfsBsS9uMCIxEDhE42hiw=
   TestData:
-	secure: wwJs9DKjkgsQsYOfbV6ALD3hMurRzmUDkMk2bbPuo0Q=
+    secure: wwJs9DKjkgsQsYOfbV6ALD3hMurRzmUDkMk2bbPuo0Q=
 
 install:
 - cmd echo %TestData%
