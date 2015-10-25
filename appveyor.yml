@@ -13,7 +13,7 @@ install:
 - cmd: nuget install redis-64 -excludeversion
 - cmd: redis-64\redis-server.exe --service-install 
 - cmd: redis-64\redis-server.exe --service-start
-- cmd: DownloadFile https://github.com/SonarSource/sonar-msbuild-runner/releases/download/1.0.1/MSBuild.SonarQube.Runner-1.0.1.zip
+- ps: Start-FileDownload https://github.com/SonarSource/sonar-msbuild-runner/releases/download/1.0.1/MSBuild.SonarQube.Runner-1.0.1.zip
 - cmd: 7z.exe e MSBuild.SonarQube.Runner-1.0.1.zip
 
 configuration: Debug
