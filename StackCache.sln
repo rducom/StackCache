@@ -23,8 +23,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{2A6E71A8
 	ProjectSection(SolutionItems) = preProject
 		.travis.yml = .travis.yml
 		appveyor.yml = appveyor.yml
+		MSBuild.SonarQube.Runner.exe = MSBuild.SonarQube.Runner.exe
 		Redis.cmd = Redis.cmd
 		Redis.kill.cmd = Redis.kill.cmd
+		SonarQube.Analysis.xml.enc = SonarQube.Analysis.xml.enc
+		SonarQube.Common.dll = SonarQube.Common.dll
 		SonarRunner.cmd = SonarRunner.cmd
 	EndProjectSection
 EndProject

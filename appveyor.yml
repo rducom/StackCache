@@ -1,23 +1,16 @@
 environment:
   COVERALLS_REPO_TOKEN:
     secure: kwZmZVMlkMBfoLy7tJOcm4emlFLrdRkvoIKbGSKXTDQ/21dbDg30yrSG5/dvtEJ0
-  SonarServer:
-    secure: YZ5qSxTneyZ6VRI63hpneF7sAJyohVpSktCtV1kFwtOYsMJbsunNKqOOOx+br9Y2
-  SonarUser:
-    secure: KLNGp9gov7beUPgXlPl9JQ==
-  SonarPassword:
-    secure: 02lHHiYYhDhj8muA+ph2HkLfsBsS9uMCIxEDhE42hiw=
-  TestData:
-    secure: wwJs9DKjkgsQsYOfbV6ALD3hMurRzmUDkMk2bbPuo0Q=
+  SonarConfig:
+    secure: 8JPjw1L6i1Gt9FJClkFDQMd8NGRt9UJFb4UV2vUdjl2cWYhVmV/0Qj5jNEQR+O9G
 
 install:
-- cmd echo %TestData%
+- nuget install secure-file -ExcludeVersion
+- secure-file\tools\secure-file -decrypt SonarQube.Analysis.xml.enc -secret %SonarConfig%
 - nuget restore
 - cmd: nuget install redis-64 -excludeversion
 - cmd: redis-64\redis-server.exe --service-install 
 - cmd: redis-64\redis-server.exe --service-start
-- ps: Start-FileDownload https://github.com/SonarSource/sonar-msbuild-runner/releases/download/1.0.1/MSBuild.SonarQube.Runner-1.0.1.zip
-- cmd: 7z.exe e MSBuild.SonarQube.Runner-1.0.1.zip
 
 configuration: Debug
 
